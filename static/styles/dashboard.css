@@ -1,0 +1,11 @@
+a.button {
+    -webkit-appearance: button;
+    -moz-appearance: button;
+
+    text-decoration: none;
+    color: initial;
+}
+
+h1{
+    color: red;
+}
