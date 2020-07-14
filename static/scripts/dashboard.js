@@ -1,6 +1,10 @@
+a = "";
+
 function getMetrics(){
     const request = new XMLHttpRequest();
-    request.open("GET", "/live", true);
+    request.open("GET", "/metrics", true);
     request.send(null);
-    return request.responseText;
+    a = request.responseText;
+    return(request.responseText);
 }
+

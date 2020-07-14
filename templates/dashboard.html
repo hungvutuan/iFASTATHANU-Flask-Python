@@ -7,14 +7,14 @@
         <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/dashboard.css') }}">
     </head>
     <body>
-    <h1>This is the dashboard</h1>
+    <h1>Dashboard</h1>
 
-    <form action="">
-        <input type="submit" value="Press to get metrics"/>
-    </form>
+{#    <form action="">#}
+{#        <input type="submit" value="Press to get metrics"/>#}
+{#    </form>#}
 
     <p>
-        <button onclick="getMetrics()">Get metrics</button>
+        <a onclick="getMetrics()" href="metrics.html" class="button">GET metrics</a>
     </p>
 
     <script type="text/javascript"

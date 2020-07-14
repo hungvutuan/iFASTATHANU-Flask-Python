@@ -1,0 +1,12 @@
+[
+  {
+    "smoke": 50,
+    "temperature": 23,
+    "gas": 50
+  },
+  {
+    "smoke": 25,
+    "temperature": 40,
+    "gas": 20
+  }
+]
