@@ -2,21 +2,22 @@
 from flask import Flask, render_template, jsonify, request
 from flask_restful import Resource, Api
 import json
-import database
+import database as db
 import decorator_serverboot
 
 app = Flask(__name__)
 api = Api(app)
 app.secret_key = "vth"
+decorator_serverboot.decorate()
 
-print(database.get_all_history_sensor())
 
-# Read .json files
-with open('metrics.json', 'r') as _metrics:
-    metrics = json.load(_metrics)
-# print("Metrics:")
-# for metric in metrics:
-#     print(metric)
+def read_json_file(json_file):
+    """Read *.json files"""
+    with open(json_file, 'r') as _metrics:
+        return json.load(_metrics)
+
+
+metrics = read_json_file('metrics.json')
 
 
 class SecretKey(Resource):
@@ -26,9 +27,9 @@ class SecretKey(Resource):
 
 api.add_resource(SecretKey, '/secretKey')
 
-todos = {}
-
-
+# todos = {}
+#
+#
 # class TodoSimple(Resource):
 #     def get(self, todo_id):
 #         return {todo_id: todos[todo_id]}
@@ -57,10 +58,27 @@ def not_found(error=None):
     return resp
 
 
+@app.errorhandler(500)
+def internal_server_error(error=None):
+    mess = {
+        "status": 500,
+        "message": "Internal server error at " + request.url
+    }
+    resp = jsonify(mess)
+    resp.status_code = 500
+    return resp
+
+
 @app.route('/metrics', methods=['GET', 'POST'])
-def init(device_name=None):
+def get_metrics(device_name=None):
     if request.method == 'GET':
         return jsonify(metrics)
+
+
+@app.route('/history', methods=['GET', 'POST'])
+def history():
+    if request.method == 'GET':
+        return db.get_all_history_sensor()
 
 
 if __name__ == '__ main__':
