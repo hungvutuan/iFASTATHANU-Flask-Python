@@ -20,4 +20,4 @@ Navigate using `cd` to the extracted folder and use cmd to run:
 ```
 PEP 8 
 -----
-The syntax, indentation, naming scheme, layout, etc. of this application follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style for Python code.
+The syntax, indentation, naming scheme, layout, etc. of this application follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style for Python code.
