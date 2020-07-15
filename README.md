@@ -16,7 +16,7 @@ Running the back-end components
 -------------------------------
 Navigate to the extracted folder and use cmd to run:
 
-  flask run
+  `flask run`
  
 PEP 8 
 -----
