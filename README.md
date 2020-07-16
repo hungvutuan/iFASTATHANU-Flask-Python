@@ -16,6 +16,7 @@ Running the back-end components
 -------------------------------
 Navigate using `cd` to the extracted folder and use cmd to run:
 ```
+  set FLASK_APP = app
   flask run
 ```
 PEP 8 
