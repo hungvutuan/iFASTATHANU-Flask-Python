@@ -1,0 +1,2 @@
+recursive-include iFASTATHANU/templates *
+recursive-include iFASTATHANU/static *
