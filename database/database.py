@@ -1,6 +1,6 @@
-import mysql.connector
-import json
 import datetime
+import mysql.connector
+
 import DTO
 
 query_get_all_history_sensor = "select * from history_sensor"
@@ -17,12 +17,17 @@ def init_db(host, user, pw, _db):
         host=host,
         user=user,
         password=pw,
-        database=_db
+        database=_db,
+        auth_plugin='mysql_native_password'
     )
 
 
 # init db
-db = init_db("localhost", "root", "IFA$T123", "ifast_resource")
+db_host = "localhost"
+db_user = "root"
+db_password = "IFA$T123"
+db_database = "ifast_resource"
+db = init_db(db_host, db_user, db_password, db_database)
 
 
 def default(o):
