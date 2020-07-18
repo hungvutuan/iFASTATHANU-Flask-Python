@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='iFASTATHANU',
-    version='1.0',
+    version='0.1.0',
     long_description=__doc__,
     packages=find_packages(),
     include_package_data=True,
@@ -11,8 +11,8 @@ setup(
         'Source': 'https://github.com/hungvutuan/iFASTATHANU-Flask-Python'
     },
     install_requires=[
-        'Flask>=0.2',
-        'mysql-connector-python>=8.0',
-        'pydantic>=1.6'
+        'Flask>=1.0',
+        'mysql-connector-python',
+        'pydantic==1.6'
     ]
 )
