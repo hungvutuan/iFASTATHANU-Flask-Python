@@ -41,6 +41,26 @@ def error_bad_request():
     return resp
 
 
+@app.errorhandler(401)
+def error_unauthorized():
+    resp = jsonify({
+        'status': 401,
+        'message': 'Unauthorized Connection'
+    })
+    resp.status_code = 401
+    return resp
+
+
+@app.errorhandler(403)
+def error_bad_request():
+    resp = jsonify({
+        'status': 403,
+        'message': 'Forbidden Access'
+    })
+    resp.status_code = 403
+    return resp
+
+
 @app.errorhandler(409)
 def error_conflict():
     resp = jsonify({

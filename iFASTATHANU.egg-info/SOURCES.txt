@@ -1,0 +1,10 @@
+MANIFEST.in
+README.md
+setup.cfg
+setup.py
+iFASTATHANU.egg-info/PKG-INFO
+iFASTATHANU.egg-info/SOURCES.txt
+iFASTATHANU.egg-info/dependency_links.txt
+iFASTATHANU.egg-info/not-zip-safe
+iFASTATHANU.egg-info/requires.txt
+iFASTATHANU.egg-info/top_level.txt
