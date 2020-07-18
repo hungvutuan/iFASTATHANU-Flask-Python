@@ -72,20 +72,22 @@ def error_conflict():
 
 
 @app.errorhandler(404)
-def error_not_found():
+def error_not_found(error=None):
     resp = jsonify({
         'status': 404,
-        'message': 'Not found: ' + request.url
+        'message': 'Not found: ' + request.url,
+        'error': error
     })
     resp.status_code = 404
     return resp
 
 
 @app.errorhandler(500)
-def error_internal_server_error():
+def error_internal_server_error(error=None):
     resp = jsonify({
         "status": 500,
-        "message": "Internal server error at " + request.url
+        "message": "Internal server error at " + request.url,
+        "error": error
     })
     resp.status_code = 500
     return resp
