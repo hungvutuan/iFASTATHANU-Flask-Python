@@ -8,34 +8,17 @@ Tuan Hung Vu - [GitHub](https://github.com/hungvutuan), [LinkedIn](https://www.l
 
 Requirements 
 ------------
-Python 3.x is required to run this application. Download the latest version of Python 3.x [here](https://www.python.org/downloads/) and [configure the global environment variable PATH](https://geek-university.com/python/add-python-to-the-windows-path/) to your installation folder.
-- Flask 1.1.x is required to run this application.
+Python 3.x is required to run this application. Download the latest version of Python 3 [here](https://www.python.org/downloads/) and [configure the global environment variable PATH](https://geek-university.com/python/add-python-to-the-windows-path/) to your installation folder.
 
-Flask installation (for Windows)
+Installation (for Windows)
 --------------------------
 - Clone the codes from GitHub and extract the downloaded .ZIP file.
-- Use Command Line (cmd) to download the latest version of Flask: 
-```
-pip install flask
-```
-- Add the Flask environment variable to PATH to use `flask`.
-If you install Python at its default folder then use this command:
-```
-set PATH = C:\Users\YOUR-NAME\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.x-YOUR-VERSION\LocalCache\local-packages\Python-YOUR-VERSION\Scripts
-```
+- Run the `setup.cmd` file to install all dependencies.
+- Establish the connection to MySQL database with the credentials in the code.
 
 Running the back-end components
 -------------------------------
-- Install dependencies using this command (with a dot "." at the end):
-```
-pip install -e .
-```
-- Establish the connection to MySQL database with the credentials in the code.
- - Then, navigate using `cd` to the extracted folder and use cmd to run:
-```
-set FLASK_APP=app.py
-flask run
-```
+Run the `iFASTATHANU.cmd` file.
 
 PEP 8 
 -----
