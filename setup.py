@@ -1,5 +1,9 @@
 from setuptools import setup, find_packages
 
+# Reduce maintenance by using both of dependencies' management files
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setup(
     name='iFASTATHANU',
     version='0.1.0',
@@ -10,9 +14,5 @@ setup(
     project_urls={
         'Source': 'https://github.com/hungvutuan/iFASTATHANU-Flask-Python'
     },
-    install_requires=[
-        'Flask>=1.0',
-        'mysql-connector-python',
-        'pydantic==1.6'
-    ]
+    install_requires=requirements
 )

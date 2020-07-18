@@ -26,9 +26,9 @@ set PATH = C:\Users\YOUR-NAME\AppData\Local\Packages\PythonSoftwareFoundation.Py
 
 Running the back-end components
 -------------------------------
-- Install dependencies with:
+- Install dependencies using this command (with a dot "." at the end):
 ```
-pip install -r requirements.txt
+pip install -e .
 ```
 - Establish the connection to MySQL database with the credentials in the code.
  - Then, navigate using `cd` to the extracted folder and use cmd to run:
