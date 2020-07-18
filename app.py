@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-from flask import Flask, render_template, jsonify, request
-from flask_restful import Api
+import os
+
+from flask import Flask, render_template, jsonify, request, send_from_directory
 import json
 from database import database as db
 from templates import decorator_serverboot
 
 app = Flask(__name__)
-api = Api(app)
 app.secret_key = "vth"
 decorator_serverboot.decorate()
 
@@ -20,26 +20,10 @@ def read_json_file(json_file):
 metrics = read_json_file('metrics.json')
 
 
-# class SecretKey(Resource):
-#     def get(self):
-#         return app.secret_key
-#
-#
-# api.add_resource(SecretKey, '/secretKey')
-
-# todos = {}
-#
-#
-# class TodoSimple(Resource):
-#     def get(self, todo_id):
-#         return {todo_id: todos[todo_id]}
-#
-#     def put(self, todo_id):
-#         todos[todo_id] = request.form['data']
-#         return {todo_id: todos[todo_id]}
-#
-#
-# api.add_resource(TodoSimple, '/<string:todo_id>')
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico',
+                               mimetype='image/vnd.microsoft.icon')
 
 
 @app.route('/')
@@ -47,24 +31,42 @@ def init_dashboard():
     return render_template("dashboard.html")
 
 
+@app.errorhandler(400)
+def error_bad_request():
+    resp = jsonify({
+        'status': 400,
+        'message': 'Bad Request'
+    })
+    resp.status_code = 400
+    return resp
+
+
+@app.errorhandler(409)
+def error_conflict():
+    resp = jsonify({
+        'status': 409,
+        'message': 'Conflict'
+    })
+    resp.status_code = 409
+    return resp
+
+
 @app.errorhandler(404)
-def not_found():
-    message = {
+def error_not_found():
+    resp = jsonify({
         'status': 404,
         'message': 'Not found: ' + request.url
-    }
-    resp = jsonify(message)
+    })
     resp.status_code = 404
     return resp
 
 
 @app.errorhandler(500)
-def internal_server_error():
-    mess = {
+def error_internal_server_error():
+    resp = jsonify({
         "status": 500,
         "message": "Internal server error at " + request.url
-    }
-    resp = jsonify(mess)
+    })
     resp.status_code = 500
     return resp
 

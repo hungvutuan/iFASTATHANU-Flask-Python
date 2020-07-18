@@ -1,6 +1,6 @@
-import datetime
 import mysql.connector
-
+import json
+import datetime
 import DTO
 
 query_get_all_history_sensor = "select * from history_sensor"
@@ -27,7 +27,11 @@ db_host = "localhost"
 db_user = "root"
 db_password = "IFA$T123"
 db_database = "ifast_resource"
-db = init_db(db_host, db_user, db_password, db_database)
+try:
+    db = init_db(db_host, db_user, db_password, db_database)
+except mysql.connector.Error as err:
+    print("The connection to the MySQL database was interrupted.\n"
+          "Error found: {}".format(err))
 
 
 def default(o):
@@ -36,7 +40,7 @@ def default(o):
         return o.isoformat()
 
 
-def handle_return(query, dto):
+def handle_query(query, dto):
     """Perform the QUERY and return an DTO json object"""
     cursor = db.cursor()
     cursor.execute(query)
@@ -55,24 +59,37 @@ def handle_return(query, dto):
 
 
 def get_all_history_sensor():
-    return handle_return(query_get_all_history_sensor, DTO.get_dto_history_sensor())
+    return handle_query(query_get_all_history_sensor, DTO.get_dto_history_sensor())
 
 
 def get_all_gas_sensor():
-    return handle_return(query_get_all_gas_sensor, DTO.get_dto_gas_sensor())
+    return handle_query(query_get_all_gas_sensor, DTO.get_dto_gas_sensor())
 
 
 def get_all_device():
-    return handle_return(query_get_all_device, DTO.get_dto_device())
+    return handle_query(query_get_all_device, DTO.get_dto_device())
 
 
 def get_all_sensor_loc():
-    return handle_return(query_get_all_sensor_loc, DTO.get_dto_sensor_loc())
+    return handle_query(query_get_all_sensor_loc, DTO.get_dto_sensor_loc())
 
 
 def get_all_smoke_sensor():
-    return handle_return(query_get_all_smoke_sensor, DTO.get_dto_smoke_sensor())
+    return handle_query(query_get_all_smoke_sensor, DTO.get_dto_smoke_sensor())
 
 
 def get_all_temp_sensor():
-    return handle_return(query_get_all_temp_sensor, DTO.get_dto_temp_sensor())
+    return handle_query(query_get_all_temp_sensor, DTO.get_dto_temp_sensor())
+
+# def insert_history_sensor():
+#
+# def insert_gas_sensor():
+#
+# def insert_device():
+#
+# def insert_sensor_loc():
+#
+# def insert_smoke_sensor():
+#
+# def insert_temp_sensor():
+#
