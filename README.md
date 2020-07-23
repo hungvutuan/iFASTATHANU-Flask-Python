@@ -4,29 +4,22 @@ iFASTATHANU is an early-fire-alarming system, combining the strength of embedded
 
 Author(s)
 ---------
-Tuan Hung Vu - [GitHub](https://github.com/hungvutuan?tab=repositories), [LinkedIn](https://www.linkedin.com/in/tuan-hung-vu-734349192/).
+Tuan Hung Vu - [GitHub](https://github.com/hungvutuan), [LinkedIn](https://www.linkedin.com/in/tuan-hung-vu-734349192/).
 
 Requirements 
 ------------
-- Python 3.x is required to run this application. Download the latest version of Python 3.x [here](https://www.python.org/downloads/).
-- Flask is required to run this application.
+Python 3.x is required to run this application. Download the latest version of Python 3 [here](https://www.python.org/downloads/) and [configure the global environment variable PATH](https://geek-university.com/python/add-python-to-the-windows-path/) to your installation folder.
 
-Installation
-------------
-Clone the codes from GitHub and extract the downloaded .ZIP file.
-Use Command Line (cmd) to download the latest version of Flask: 
-```
-pip install flask
-```
-in the application's folder.
+Installation (for Windows)
+--------------------------
+- Clone the codes from GitHub and extract the downloaded .ZIP file.
+- Run the `setup.cmd` file to install all dependencies.
+- Establish the connection to MySQL database with the credentials in the code.
 
 Running the back-end components
 -------------------------------
-Navigate using `cd` to the extracted folder and use cmd to run:
-```
-  set FLASK_APP=app
-  flask run
-```
+Run the `iFASTATHANU.cmd` file.
+
 PEP 8 
 -----
 The syntax, indentation, naming scheme, layout, etc. of this application follow the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style for Python code.
