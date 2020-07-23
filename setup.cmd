@@ -1,4 +1,7 @@
 @echo off
+title iFASTATHANU Setup (0.1.0)
+echo Starting download...
+echo.
 pip install -e .
 
 echo.
