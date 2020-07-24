@@ -24,12 +24,6 @@ def read_json_file(json_file):
 metrics = read_json_file('metrics.json')
 
 
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico',
-                               mimetype='image/vnd.microsoft.icon')
-
-
 @app.route('/')
 def init_dashboard():
     return render_template("dashboard.html")
@@ -118,7 +112,7 @@ def insert_device():
             return "Connection failed"
 
 
-@app.route('/sensor/smoke/new', methods=['POST'])
+@app.route('/sensors/smoke/', methods=['POST'])
 def insert_smoke_sensor():
     try:
         smoke_name = request.args.get("smoke_name")
@@ -129,7 +123,7 @@ def insert_smoke_sensor():
         return "Connection failed"
 
 
-@app.route('/sensor/loc/new', methods=['POST'])
+@app.route('/sensors/loc/', methods=['POST'])
 def insert_loc_sensor():
     try:
         loc_name = request.args.get("loc_name")
@@ -139,7 +133,7 @@ def insert_loc_sensor():
         return "Connection failed"
 
 
-@app.route('/sensor/gas/new', methods=['POST'])
+@app.route('/sensors/gas/', methods=['POST'])
 def insert_gas_sensor():
     try:
         gas_name = request.args.get("gas_name")
@@ -150,7 +144,7 @@ def insert_gas_sensor():
         return "Connection failed"
 
 
-@app.route('/sensor/temp/new', methods=['POST'])
+@app.route('/sensors/temp/', methods=['POST'])
 def insert_temp_sensor():
     try:
         temp_name = request.args.get("temp_name")
@@ -161,7 +155,7 @@ def insert_temp_sensor():
         return "Connection failed"
 
 
-@app.route('/sensor/history/new', methods=['POST'])
+@app.route('/sensors/history/', methods=['POST'])
 def insert_history_sensor():
     try:
         device_id = request.args.get("device_id")
@@ -170,6 +164,7 @@ def insert_history_sensor():
         gas_reading = request.args.get("gas_reading")
         date_reading = request.args.get("date_reading")
         temp_id = request.args.get("temp_id")
+        print(type(temp_id))
         smoke_id = request.args.get("smoke_id")
         gas_id = request.args.get("gas_id")
         return db.insert_history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id,
@@ -179,5 +174,22 @@ def insert_history_sensor():
         return "Connection failed"
 
 
+@app.route("/devices/delete", methods=['DELETE'])
+def delete_device():
+    try:
+        device_id = request.args.get("device_id")
+        return db.delete_device(device_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return "Connection failed"
+
+
+@app.after_request
+def add_header(resp):
+    resp.headers['Allow'] = "POST, GET"
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    return resp
+
+
 if __name__ == '__ main__':
-    app.run(host='localhost', threaded=True)
+    app.run(host='localhost', threaded=True, debug=True)

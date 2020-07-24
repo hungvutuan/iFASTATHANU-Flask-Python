@@ -69,3 +69,9 @@ def get_dto_temp_sensor():
         "temp_name",
         "loc_id"
     ]
+
+
+def get_dto_message():
+    return [
+        "message"
+    ]

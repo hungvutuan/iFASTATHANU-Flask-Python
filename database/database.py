@@ -6,6 +6,7 @@ from flask import jsonify
 
 import DTO
 
+# select
 query_get_all_history_sensor = "select * from history_sensor;"
 query_get_all_gas_sensor = "select * from gas_sensor;"
 query_get_all_sensor_loc = "select * from sensor_loc;"
@@ -13,6 +14,7 @@ query_get_all_device = "SELECT * FROM DEVICE;"
 query_get_all_smoke_sensor = "SELECT * FROM smoke_sensor;"
 query_get_all_temp_sensor = "SELECT * FROM temp_sensor;"
 
+# insert
 query_insert_device = "INSERT INTO DEVICE (device_name, device_type, device_loc_id, smoke_id, gas_id, temp_id) " \
                       "VALUES{};"
 query_insert_smoke_sensor = "insert into smoke_sensor(smoke_name, loc_id)values{};"
@@ -21,6 +23,14 @@ query_insert_temp_sensor = "insert into temp_sensor(temp_name, loc_id) values{};
 query_insert_gas_sensor = "insert into gas_sensor(gas_name, loc_id) values{};"
 query_insert_history_sensor = "insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, " \
                               "date_reading, temp_id, smoke_id, gas_id) values{}; "
+
+# delete
+query_delete_device = "DELETE FROM device WHERE device_id = {} LIMIT 1;"
+query_delete_smoke_sensor = "DELETE FROM smoke_sensor WHERE smoke_id = {} LIMIT 1;"
+query_delete_sensor_loc = "DELETE FROM sensor_loc WHERE loc_id = {} LIMIT 1;"
+query_delete_temp_sensor = "DELETE FROM temp_sensor WHERE temp_id = {} LIMIT 1;"
+query_delete_gas_sensor = "DELETE FROM gas_sensor WHERE gas_id = {} LIMIT 1;"
+query_delete_history_sensor = "DELETE FROM history_sensor WHERE history_id = {} LIMIT 1;"
 
 
 def init_db(host, user, pw, _db):
@@ -72,7 +82,7 @@ def handle_select_query(query, dto):
     else:
         cursor.close()
         db.rollback()
-        return return_message("Nothing was run")
+        return return_message("Error encountered. Nothing was run")
 
 
 def return_message(String):
@@ -80,7 +90,7 @@ def return_message(String):
 
 
 def handle_insert_query(query, *args):
-    """Run an insert query, with *args as values in the sql command VALUES()"""
+    """Run an insert query, with many *args as values in the sql command VALUES()"""
     cursor = db.cursor()
     cursor.execute(query.format(args))
 
@@ -88,6 +98,22 @@ def handle_insert_query(query, *args):
     # save changes
     db.commit()
     return cursor.statement
+
+
+def handle_delete_query(query, arg):
+    """Run a delete query, taking only one argument"""
+    c = db.cursor()
+    c.execute(query.format(arg))
+
+    c.close()
+    db.commit()
+    return c.statement
+
+
+# DELETE queries
+def delete_device(device_id):
+    handle_delete_query(query_delete_device, device_id)
+    return return_message("Device with ID " + str(device_id)+" was deleted")
 
 
 # Insert queries
