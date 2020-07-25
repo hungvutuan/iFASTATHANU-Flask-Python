@@ -6,13 +6,21 @@ from flask import jsonify
 
 import DTO
 
-# select
+# select all
 query_get_all_history_sensor = "select * from history_sensor;"
 query_get_all_gas_sensor = "select * from gas_sensor;"
 query_get_all_sensor_loc = "select * from sensor_loc;"
 query_get_all_device = "SELECT * FROM DEVICE;"
 query_get_all_smoke_sensor = "SELECT * FROM smoke_sensor;"
 query_get_all_temp_sensor = "SELECT * FROM temp_sensor;"
+
+# select by id
+query_get_history_sensor_by_id = "select * from history_sensor where history_id = {};"
+query_get_gas_sensor_by_id = "select * from device where device_id = {;"
+query_get_smoke_sensor_by_id = "select * from smoke_sensor where smoke_id = {};"
+query_get_temp_sensor_by_id = "select * from temp_sensor where temp_id = {};"
+query_get_sensor_loc_by_id = "select * from sensor_loc where loc_id = {};"
+query_get_device_by_id = "select * from device where device_id = {};"
 
 # insert
 query_insert_device = "INSERT INTO DEVICE (device_name, device_type, device_loc_id, smoke_id, gas_id, temp_id) " \
@@ -31,6 +39,12 @@ query_delete_sensor_loc = "DELETE FROM sensor_loc WHERE loc_id = {} LIMIT 1;"
 query_delete_temp_sensor = "DELETE FROM temp_sensor WHERE temp_id = {} LIMIT 1;"
 query_delete_gas_sensor = "DELETE FROM gas_sensor WHERE gas_id = {} LIMIT 1;"
 query_delete_history_sensor = "DELETE FROM history_sensor WHERE history_id = {} LIMIT 1;"
+
+fail_db_message = {"message": "Database error while sending query"}
+
+
+def get_fail_db_message():
+    return fail_db_message
 
 
 def init_db(host, user, pw, _db):
@@ -63,30 +77,49 @@ def default(o):
         return o.isoformat()
 
 
-def handle_select_query(query, dto):
-    """Perform the QUERY and return an DTO json object"""
-    cursor = db.cursor()
-    cursor.execute(query)
-    db_results = cursor.fetchall()
-
+def handle_select_query(query, dto, *args):
+    """Perform the QUERY and return an DTO json object
+    If an argument is passed, it assumes that it is ID
+    to fill in the query"""
     if dto is not None:
-        container = {}
+        cursor = db.cursor()
+
+        # if no argument (i.e. id) is passed, perform the whole query
+        if len(args) == 0:
+            cursor.execute(query)
+            db_results = cursor.fetchall()
+
+        # else if an id is passed -> format the query and return only one line of values
+        else:
+            cursor.execute(query.format(args[0]))
+            db_results = cursor.fetchall()
+            if len(db_results) > 1:
+                return_message(None)
+
+        all_obj = []
+        obj = {}
         for row in db_results:
-            for i in range(len(dto)):
-                default(row[i])
-                container.update({dto[i]: row[i]})
+            for i in range(len(row)):
+                # default(row[i])
+                obj.update({dto[i]: row[i]})
+            all_obj.append(obj.copy())
         cursor.close()
         db.rollback()
-        # return json.dumps(container, default=default)
-        return container
+        return jsonify(all_obj)
     else:
-        cursor.close()
-        db.rollback()
-        return return_message("Error encountered. Nothing was run")
+        return return_message(None)
 
 
 def return_message(String):
-    return {"message": String}
+    if String is None:
+        return jsonify(
+            {"success": False,
+             "message": "Request unsuccessful"}
+        )
+    return jsonify(
+        {"success": True,
+         "message": String}
+    )
 
 
 def handle_insert_query(query, *args):
@@ -101,7 +134,7 @@ def handle_insert_query(query, *args):
 
 
 def handle_delete_query(query, arg):
-    """Run a delete query, taking only one argument"""
+    """Run a delete query, taking only one argument as the ID of the object/DTO"""
     c = db.cursor()
     c.execute(query.format(arg))
 
@@ -113,7 +146,7 @@ def handle_delete_query(query, arg):
 # DELETE queries
 def delete_device(device_id):
     handle_delete_query(query_delete_device, device_id)
-    return return_message("Device with ID " + str(device_id)+" was deleted")
+    return return_message("Device with ID " + str(device_id) + " was deleted")
 
 
 # Insert queries
@@ -171,3 +204,27 @@ def get_all_smoke_sensor():
 
 def get_all_temp_sensor():
     return handle_select_query(query_get_all_temp_sensor, DTO.get_dto_temp_sensor())
+
+
+def get_history_sensor_by_id(history_id):
+    return handle_select_query(query_get_history_sensor_by_id, DTO.get_dto_history_sensor(), history_id)
+
+
+def get_gas_sensor_by_id(gas_id):
+    return handle_select_query(query_get_gas_sensor_by_id, DTO.get_dto_gas_sensor(), gas_id)
+
+
+def get_smoke_sensor_by_id(smoke_id):
+    return handle_select_query(query_get_smoke_sensor_by_id, DTO.get_dto_smoke_sensor(), smoke_id)
+
+
+def get_temp_sensor_by_id(temp_id):
+    return handle_select_query(query_get_temp_sensor_by_id, DTO.get_dto_temp_sensor(), temp_id)
+
+
+def get_sensor_loc_by_id(loc_id):
+    return handle_select_query(query_get_sensor_loc_by_id, DTO.get_dto_sensor_loc(), loc_id)
+
+
+def get_device_by_id(device_id):
+    return handle_select_query(query_get_device_by_id, DTO.get_dto_device(), device_id)

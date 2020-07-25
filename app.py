@@ -84,19 +84,26 @@ def error_internal_server_error(error=None):
     return render_template("error_500.html"), 500
 
 
-@app.route('/metrics', methods=['GET', 'POST'])
-def get_metrics():
+@app.route('/metrics/all', methods=['GET', 'POST'])
+def get_all_metrics():
     if request.method == 'GET':
         return jsonify(metrics)
 
 
-@app.route('/history', methods=['GET', 'POST'])
-def history():
+@app.route('/history/all', methods=['GET'])
+def get_all_history():
     if request.method == 'GET':
         return db.get_all_history_sensor()
 
 
-@app.route('/device/new', methods=['POST'])
+@app.route('/history/', methods=['GET'])
+def get_history_by_id():
+    if request.method == 'GET':
+        history_id = request.args.get("history_id")
+        return db.get_history_sensor_by_id(history_id)
+
+
+@app.route('/devices/', methods=['POST'])
 def insert_device():
     if request.method == 'POST':
         try:
@@ -109,7 +116,7 @@ def insert_device():
             return db.insert_device(device_name, device_type, device_loc_id, smoke_id, gas_id, temp_id)
         except DatabaseError as e:
             app.logger.exception(e)
-            return "Connection failed"
+            return db.get_fail_db_message()
 
 
 @app.route('/sensors/smoke/', methods=['POST'])
@@ -120,7 +127,7 @@ def insert_smoke_sensor():
         return db.insert_smoke_sensor(smoke_name, loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return "Connection failed"
+        return db.get_fail_db_message()
 
 
 @app.route('/sensors/loc/', methods=['POST'])
@@ -130,7 +137,7 @@ def insert_loc_sensor():
         return db.insert_sensor_loc(loc_name)
     except DatabaseError as e:
         app.logger.exception(e)
-        return "Connection failed"
+        return db.get_fail_db_message()
 
 
 @app.route('/sensors/gas/', methods=['POST'])
@@ -141,7 +148,7 @@ def insert_gas_sensor():
         return db.insert_gas_sensor(gas_name, loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return "Connection failed"
+        return db.get_fail_db_message()
 
 
 @app.route('/sensors/temp/', methods=['POST'])
@@ -152,7 +159,7 @@ def insert_temp_sensor():
         return db.insert_temp_sensor(temp_name, loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return "Connection failed"
+        return db.get_fail_db_message()
 
 
 @app.route('/sensors/history/', methods=['POST'])
@@ -164,14 +171,13 @@ def insert_history_sensor():
         gas_reading = request.args.get("gas_reading")
         date_reading = request.args.get("date_reading")
         temp_id = request.args.get("temp_id")
-        print(type(temp_id))
         smoke_id = request.args.get("smoke_id")
         gas_id = request.args.get("gas_id")
         return db.insert_history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id,
                                         smoke_id, gas_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return "Connection failed"
+        return db.get_fail_db_message()
 
 
 @app.route("/devices/delete", methods=['DELETE'])
@@ -181,7 +187,7 @@ def delete_device():
         return db.delete_device(device_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return "Connection failed"
+        return db.get_fail_db_message()
 
 
 @app.after_request
