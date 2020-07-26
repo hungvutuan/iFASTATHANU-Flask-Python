@@ -1,18 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
-import os
 
-from flask import Flask, render_template, jsonify, request, send_from_directory, abort
+from flask import Flask, render_template, jsonify, request
 import json
 
 from mysql.connector import DatabaseError
 
 from database import database as db
-from templates import decorator_serverboot
+from bin import decorator_serverboot as decorator
 
 app = Flask(__name__)
 app.secret_key = "4,\x178sg\xde=U=\xa7\xe5Hr\x11\xaf"
-decorator_serverboot.decorate()
+decorator.decorate()
 
 
 def read_json_file(json_file):
@@ -84,25 +83,69 @@ def error_internal_server_error(error=None):
     return render_template("error_500.html"), 500
 
 
-@app.route('/metrics/all', methods=['GET', 'POST'])
+# Get/Select
+@app.route('/metrics', methods=['GET', 'POST'])
 def get_all_metrics():
     if request.method == 'GET':
         return jsonify(metrics)
 
 
-@app.route('/history/all', methods=['GET'])
-def get_all_history():
+@app.route('/sensors/history', methods=['GET'])
+def get_history():
     if request.method == 'GET':
-        return db.get_all_history_sensor()
+        history_id = request.args.get("id")
+        if history_id is None:
+            return db.get_all_history_sensor()
+        else:
+            return db.get_history_sensor_by_id(history_id)
 
 
-@app.route('/history/', methods=['GET'])
-def get_history_by_id():
-    if request.method == 'GET':
-        history_id = request.args.get("history_id")
-        return db.get_history_sensor_by_id(history_id)
+@app.route('/sensors/gas', methods=['GET'])
+def get_gas_sensor():
+    gas_id = request.args.get("id")
+    if gas_id is None:
+        return db.get_all_gas_sensor()
+    else:
+        return db.get_gas_sensor_by_id(gas_id)
 
 
+@app.route('/sensors/smoke', methods=['GET'])
+def get_smoke_sensor():
+    smoke_id = request.args.get("id")
+    if smoke_id is None:
+        return db.get_all_smoke_sensor()
+    else:
+        return db.get_smoke_sensor_by_id(smoke_id)
+
+
+@app.route('/sensors/temp', methods=['GET'])
+def get_temp_sensor():
+    temp_id = request.args.get("id")
+    if temp_id is None:
+        return db.get_all_temp_sensor()
+    else:
+        return db.get_temp_sensor_by_id(temp_id)
+
+
+@app.route('/sensors/loc', methods=['GET'])
+def get_sensor_loc():
+    loc_id = request.args.get("id")
+    if loc_id is None:
+        return db.get_all_sensor_loc()
+    else:
+        return db.get_sensor_loc_by_id(loc_id)
+
+
+@app.route('/devices', methods=['GET'])
+def get_device():
+    device_id = request.args.get("id")
+    if device_id is None:
+        return db.get_all_device()
+    else:
+        return db.get_device_by_id(device_id)
+
+
+# Add/Insert
 @app.route('/devices/', methods=['POST'])
 def insert_device():
     if request.method == 'POST':
@@ -162,7 +205,7 @@ def insert_temp_sensor():
         return db.get_fail_db_message()
 
 
-@app.route('/sensors/history/', methods=['POST'])
+@app.route('/sensors/history', methods=['POST'])
 def insert_history_sensor():
     try:
         device_id = request.args.get("device_id")
@@ -180,11 +223,62 @@ def insert_history_sensor():
         return db.get_fail_db_message()
 
 
-@app.route("/devices/delete", methods=['DELETE'])
+# Delete
+@app.route("/devices", methods=['DELETE'])
 def delete_device():
     try:
-        device_id = request.args.get("device_id")
-        return db.delete_device(device_id)
+        device_id = request.args.get("id")
+        return db.delete_device_by_id(device_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
+
+
+@app.route("/sensors/history", methods=['DELETE'])
+def delete_history():
+    try:
+        history_id = request.args.get("id")
+        return db.delete_history_sensor_by_id(history_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
+
+
+@app.route("/sensors/gas", methods=['DELETE'])
+def delete_sensor_gas():
+    try:
+        gas_id = request.args.get("id")
+        return db.delete_gas_sensor_by_id(gas_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
+
+
+@app.route("/sensors/smoke", methods=['DELETE'])
+def delete_sensor_smoke():
+    try:
+        smoke_id = request.args.get("id")
+        return db.delete_smoke_sensor_by_id(smoke_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
+
+
+@app.route("/sensors/temp", methods=['DELETE'])
+def delete_sensor_temp():
+    try:
+        temp_id = request.args.get("id")
+        return db.delete_temp_sensor_by_id(temp_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
+
+
+@app.route("/sensors/loc", methods=['DELETE'])
+def delete_sensor_loc():
+    try:
+        loc_id = request.args.get("id")
+        return db.delete_sensor_loc_by_id(loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
         return db.get_fail_db_message()
