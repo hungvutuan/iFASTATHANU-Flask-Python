@@ -87,62 +87,89 @@ def error_internal_server_error(error=None):
 @app.route('/metrics', methods=['GET', 'POST'])
 def get_all_metrics():
     if request.method == 'GET':
-        return jsonify(metrics)
+        try:
+            return jsonify(metrics)
+        except:
+            return db.return_message(None)
 
 
 @app.route('/sensors/history', methods=['GET'])
 def get_history():
-    if request.method == 'GET':
-        history_id = request.args.get("id")
-        if history_id is None:
-            return db.get_all_history_sensor()
-        else:
-            return db.get_history_sensor_by_id(history_id)
+    try:
+        if request.method == 'GET':
+            history_id = request.args.get("id")
+            if history_id is None:
+                return db.get_all_history_sensor()
+            else:
+                return db.get_history_sensor_by_id(history_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
 
 
 @app.route('/sensors/gas', methods=['GET'])
 def get_gas_sensor():
-    gas_id = request.args.get("id")
-    if gas_id is None:
-        return db.get_all_gas_sensor()
-    else:
-        return db.get_gas_sensor_by_id(gas_id)
+    try:
+        gas_id = request.args.get("id")
+        if gas_id is None:
+            return db.get_all_gas_sensor()
+        else:
+            return db.get_gas_sensor_by_id(gas_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
 
 
 @app.route('/sensors/smoke', methods=['GET'])
 def get_smoke_sensor():
-    smoke_id = request.args.get("id")
-    if smoke_id is None:
-        return db.get_all_smoke_sensor()
-    else:
-        return db.get_smoke_sensor_by_id(smoke_id)
+    try:
+        smoke_id = request.args.get("id")
+        if smoke_id is None:
+            return db.get_all_smoke_sensor()
+        else:
+            return db.get_smoke_sensor_by_id(smoke_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
 
 
 @app.route('/sensors/temp', methods=['GET'])
 def get_temp_sensor():
-    temp_id = request.args.get("id")
-    if temp_id is None:
-        return db.get_all_temp_sensor()
-    else:
-        return db.get_temp_sensor_by_id(temp_id)
+    try:
+        temp_id = request.args.get("id")
+        if temp_id is None:
+            return db.get_all_temp_sensor()
+        else:
+            return db.get_temp_sensor_by_id(temp_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
 
 
 @app.route('/sensors/loc', methods=['GET'])
 def get_sensor_loc():
-    loc_id = request.args.get("id")
-    if loc_id is None:
-        return db.get_all_sensor_loc()
-    else:
-        return db.get_sensor_loc_by_id(loc_id)
+    try:
+        loc_id = request.args.get("id")
+        if loc_id is None:
+            return db.get_all_sensor_loc()
+        else:
+            return db.get_sensor_loc_by_id(loc_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
 
 
 @app.route('/devices', methods=['GET'])
 def get_device():
-    device_id = request.args.get("id")
-    if device_id is None:
-        return db.get_all_device()
-    else:
-        return db.get_device_by_id(device_id)
+    try:
+        device_id = request.args.get("id")
+        if device_id is None:
+            return db.get_all_device()
+        else:
+            return db.get_device_by_id(device_id)
+    except DatabaseError as e:
+        app.logger.exception(e)
+        return db.get_fail_db_message()
 
 
 # Add/Insert
