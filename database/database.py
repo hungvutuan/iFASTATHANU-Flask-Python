@@ -62,11 +62,12 @@ def init_db(host, user, pw, _db):
         return err
 
 
-# init db
+# credentials
 db_host = "localhost"
 db_user = "root"
 db_password = "IFA$T123"
 db_database = "ifast_resource"
+# initialize DB
 db = init_db(db_host, db_user, db_password, db_database)
 
 
@@ -92,8 +93,8 @@ def handle_select_query(query, dto, *args):
         else:
             cursor.execute(query.format(args[0]))
             db_results = cursor.fetchall()
-            if len(db_results) > 1:
-                return_message(None)
+            if len(db_results) != 1:
+                return return_message(None)
 
         all_obj = []
         obj = {}
