@@ -1,17 +1,17 @@
-from datetime import datetime
-from pydantic import BaseModel
-
-
-class DtoHistory(BaseModel):
-    history_id: int
-    device_id: int
-    temp_reading: int
-    smoke_reading: int
-    gas_reading: int
-    date_reading: datetime
-    temp_id: int
-    smoke_id: int
-    gas_id: int
+# from datetime import datetime
+# from pydantic import BaseModel
+#
+#
+# class DtoHistory(BaseModel):
+#     history_id: int
+#     device_id: int
+#     temp_reading: int
+#     smoke_reading: int
+#     gas_reading: int
+#     date_reading: datetime
+#     temp_id: int
+#     smoke_id: int
+#     gas_id: int
 
 
 def get_dto_history_sensor():
