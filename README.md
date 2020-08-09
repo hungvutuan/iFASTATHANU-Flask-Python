@@ -9,7 +9,7 @@ Hong Dai Phat Tran - [GitHub](https://github.com/costelo789), [LinkedIn](https:/
 
 Requirements 
 ------------
-Python 3.x is required to run this application. Download the latest version of Python 3 [here](https://www.python.org/downloads/) and [configure the global environment variable PATH](https://geek-university.com/python/add-python-to-the-windows-path/) to your installation folder.
+Python 3.x 64-bit is required to run this application. Scroll down and download the latest version of Python 3 [here](https://www.python.org/downloads/) then [configure the global environment variable PATH](https://geek-university.com/python/add-python-to-the-windows-path/) to your installation folder.
 
 Installation (for Windows)
 --------------------------

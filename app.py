@@ -330,4 +330,4 @@ def add_header(resp):
 
 
 if __name__ == '__ main__':
-    app.run(host='localhost', threaded=True, debug=True)
+    app.run(host='localhost', threaded=True)
