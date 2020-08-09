@@ -100,8 +100,10 @@ def handle_select_query(query, dto, *args):
         obj = {}
         for row in db_results:
             for i in range(len(row)):
-                # default(row[i])
-                obj.update({dto[i]: row[i]})
+                if isinstance(row[i], (datetime.date, datetime.datetime)):
+                    obj.update({dto[i]: row[i].isoformat()})
+                else:
+                    obj.update({dto[i]: row[i]})
             all_obj.append(obj.copy())
         cursor.close()
         db.rollback()
@@ -140,6 +142,7 @@ def handle_delete_query(query, arg):
 
     c.close()
     db.commit()
+
     return c.statement
 
 
