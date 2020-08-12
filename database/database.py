@@ -5,7 +5,10 @@ from flask import jsonify
 import DTO
 
 # select all
-query_get_all_history_sensor = "select * from history_sensor;"
+query_get_all_history_sensor = "select history_id, alarm_status, loc_name, device_name, date_reading, alarm_type " \
+                               "from history_sensor h join alarm a on h.alarm_id = a.alarm_id " \
+                               "join device d on h.device_id = d.device_id " \
+                               "join sensor_loc sl on sl.loc_id = d.device_loc_id;"
 query_get_all_gas_sensor = "select * from gas_sensor;"
 query_get_all_sensor_loc = "select * from sensor_loc;"
 query_get_all_device = "SELECT * FROM DEVICE;"
@@ -98,6 +101,10 @@ def handle_select_query(query, dto, *args):
 
         all_obj = []
         obj = {}
+
+        if len(db_results) == 0:
+            return
+
         for row in db_results:
             for i in range(len(row)):
                 if isinstance(row[i], (datetime.date, datetime.datetime)):

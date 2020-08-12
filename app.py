@@ -23,7 +23,6 @@ def connect_sensors():
     client.disconnect()
     client.loop_stop()
 
-#
 
 def read_json_file(json_file):
     """Read *.json files"""
@@ -104,7 +103,7 @@ def get_all_metrics():
             return db.return_message(None)
 
 
-@app.route('/sensors/history', methods=['GET'])
+@app.route('/history', methods=['GET'])
 def get_history():
     try:
         if request.method == 'GET':
@@ -243,7 +242,7 @@ def insert_temp_sensor():
         return db.get_fail_db_message()
 
 
-@app.route('/sensors/history', methods=['POST'])
+@app.route('/history', methods=['POST'])
 def insert_history_sensor():
     try:
         device_id = request.args.get("device_id")
@@ -272,7 +271,7 @@ def delete_device():
         return db.get_fail_db_message()
 
 
-@app.route("/sensors/history", methods=['DELETE'])
+@app.route("/history", methods=['DELETE'])
 def delete_history():
     try:
         history_id = request.args.get("id")
