@@ -3,15 +3,25 @@
 
 from flask import Flask, render_template, jsonify, request
 import json
-
+import sys
 from mysql.connector import DatabaseError
-
+from Client import client
 from database import database as db
-from bin import decorator_serverboot as decorator
+from bin import decorator_serverboot as decorator, global_var
 
 app = Flask(__name__)
 app.secret_key = "4,\x178sg\xde=U=\xa7\xe5Hr\x11\xaf"
 decorator.decorate()
+
+# Confirm that we're using Python 3
+assert sys.version_info.major == 3, global_var.get_error_python_version()
+
+
+def connect_sensors():
+    client.loop_start()
+    client.connect("test.mosquitto.org", 1883, 60)
+    client.disconnect()
+    client.loop_stop()
 
 
 def read_json_file(json_file):
@@ -93,7 +103,7 @@ def get_all_metrics():
             return db.return_message(None)
 
 
-@app.route('/sensors/history', methods=['GET'])
+@app.route('/history', methods=['GET'])
 def get_history():
     try:
         if request.method == 'GET':
@@ -232,7 +242,7 @@ def insert_temp_sensor():
         return db.get_fail_db_message()
 
 
-@app.route('/sensors/history', methods=['POST'])
+@app.route('/history', methods=['POST'])
 def insert_history_sensor():
     try:
         device_id = request.args.get("device_id")
@@ -250,7 +260,7 @@ def insert_history_sensor():
         return db.get_fail_db_message()
 
 
-# Delete
+# Delete by id
 @app.route("/devices", methods=['DELETE'])
 def delete_device():
     try:
@@ -261,7 +271,7 @@ def delete_device():
         return db.get_fail_db_message()
 
 
-@app.route("/sensors/history", methods=['DELETE'])
+@app.route("/history", methods=['DELETE'])
 def delete_history():
     try:
         history_id = request.args.get("id")

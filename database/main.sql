@@ -1,7 +1,7 @@
 -- create DB
-# DROP database if exists ifast_resource;
-# create database ifast_resource;
-USE ifast_resource; 
+DROP database if exists ifast_resource;
+create database ifast_resource;
+USE ifast_resource;
 
 -- drop  tables
 drop table if exists DEVICE;
@@ -16,6 +16,13 @@ create table sensor_loc(
 	loc_id 	int unique NOT NULL AUTO_INCREMENT,
     loc_name varchar(50) not null,
     primary key (loc_id)
+);
+
+create table alarm(
+	alarm_id 		int unique NOT NULL AUTO_INCREMENT,
+    alarm_status 	varchar(50) not null,
+    alarm_type 		varchar(50) not null default "AUTO",
+    primary key (alarm_id)
 );
 
 create table DEVICE (
@@ -61,12 +68,15 @@ create table history_sensor(
     smoke_reading 	int,
     gas_reading 	int,
     date_reading 	date,
+    alarm_id 		int,
     temp_id 		int,
     smoke_id 		int,
     gas_id 			int,
     foreign key (temp_id) references temp_sensor(temp_id),
     foreign key (smoke_id) references smoke_sensor(smoke_id),
     foreign key (gas_id) references gas_sensor(gas_id),
+    foreign key (device_id) references device(device_id),
+    foreign key (alarm_id) references alarm(alarm_id),
 	primary key (history_id)
 );
 
@@ -80,21 +90,34 @@ create table history_sensor(
 insert into sensor_loc(loc_name) values('VGU Binh Duong');
 insert into sensor_loc(loc_name) values('Bosch Cong Hoa');
 
+insert into alarm(alarm_status)
+	values 	('Fire');
+insert into alarm(alarm_status)
+	values 	('Imminent');
+insert into alarm(alarm_status)
+	values 	('Safe');
+
+
 INSERT INTO DEVICE (device_name, device_type, device_loc_id, smoke_id, gas_id, temp_id)
-	VALUES 			('Home sensor', 'Raspberry Pi', 1, '01', '01', '01');
+	VALUES	('Home sensor', 'Raspberry Pi', 1, '01', '01', '01');
 INSERT INTO DEVICE (device_name, device_type, device_loc_id, smoke_id, gas_id, temp_id)
-	VALUES ('Wokrplace-1', 'Raspberry Pi', 2, '02', '02', '02');
+	VALUES	('Wokrplace-1', 'Raspberry Pi', 2, '02', '02', '02');
 
 insert into smoke_sensor(smoke_name, loc_id)
-	values('Restroom sensor', 1);
+	values	('Restroom sensor', 1);
 insert into temp_sensor(temp_name, loc_id)
-	values('Restroom sensor', 1);
+	values	('Restroom sensor', 1);
 insert into gas_sensor(gas_name, loc_id)
-	values ('Restroom sensor', 1);
+	values 	('Restroom sensor', 1);
 
 -- pseudo values for history
-insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id)
-	values(1, 10, 20, 30, "2008-04-15", 1, 1, 1);
-insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id)
-	values(1, 10, 20, 30, "2008-04-15", 1, 1, 1);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2008-04-15", 1, 1, 1, 1);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2008-04-15", 1, 1, 1, 1);
 
+
+select history_id, alarm_status, loc_name, device_name, date_reading, alarm_type
+from history_sensor h join alarm a on h.alarm_id = a.alarm_id
+	 join device d on h.device_id = d.device_id
+     join sensor_loc sl on sl.loc_id = d.device_loc_id;
