@@ -17,14 +17,11 @@
 def get_dto_history_sensor():
     return [
         "history_id",
-        "device_id",
-        "temp_reading",
-        "smoke_reading",
-        "gas_reading",
+        "alarm_status",
+        "loc_name",
+        "device_name",
         "date_reading",
-        "temp_id",
-        "smoke_id",
-        "gas_id"
+        "alarm_type"
     ]
 
 
