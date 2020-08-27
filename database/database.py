@@ -105,6 +105,7 @@ def handle_select_query(query, dto, *args):
         if len(db_results) == 0:
             return
 
+        # add key to the dictionary for each value
         for row in db_results:
             for i in range(len(row)):
                 if isinstance(row[i], (datetime.date, datetime.datetime)):
@@ -119,15 +120,15 @@ def handle_select_query(query, dto, *args):
         return return_message(None)
 
 
-def return_message(String):
-    if String is None:
+def return_message(message):
+    if message is None:
         return jsonify(
             {"success": False,
              "message": "Request unsuccessful"}
         )
     return jsonify(
         {"success": True,
-         "message": String}
+         "message": message}
     )
 
 
@@ -264,3 +265,5 @@ def get_sensor_loc_by_id(loc_id):
 
 def get_device_by_id(device_id):
     return handle_select_query(query_get_device_by_id, DTO.get_dto_device(), device_id)
+
+
