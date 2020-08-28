@@ -1,10 +1,5 @@
-# To help us perform math operations
 import numpy as np
-# to plot our data and model visually
 from matplotlib import pyplot as plt
-
-# Step 1 - Define our data
-
 
 # Input data - Of the form [X value, Y value, Bias term]
 X = np.array([
@@ -18,20 +13,24 @@ X = np.array([
 # Associated output labels - First 2 examples are labeled '-1' and last 3 are labeled '+1'
 y = np.array([-1, -1, 1, 1, 1])
 
+
 # lets plot these examples on a 2D graph!
 # for each example
-for d, sample in enumerate(X):
-    # Plot the negative samples (the first 2)
-    if d < 2:
-        plt.scatter(sample[0], sample[1], s=120, marker='_', linewidths=2)
-    # Plot the positive samples (the last 3)
-    else:
-        plt.scatter(sample[0], sample[1], s=120, marker='+', linewidths=2)
+def vis_data():
+    for d, sample in enumerate(X):
+        # Plot the negative samples (the first 2)
+        if d < 2:
+            plt.scatter(sample[0], sample[1], s=120, marker='_', linewidths=2)
+        # Plot the positive samples (the last 3)
+        else:
+            plt.scatter(sample[0], sample[1], s=120, marker='+', linewidths=2)
+
 
 # Print a possible hyperplane, that is seperating the two classes.
 # we'll two points and draw the line between them (naive guess)
 # plt.show()
 
+vis_data()
 
 # lets perform stochastic gradient descent to learn the seperating hyperplane between both classes
 
@@ -70,21 +69,12 @@ def svm_sgd_plot(X, Y):
     return w
 
 
-w = svm_sgd_plot(X, y)
-
-for d, sample in enumerate(X):
-    # Plot the negative samples
-    if d < 2:
-        plt.scatter(sample[0], sample[1], s=120, marker='_', linewidths=2)
-    # Plot the positive samples
-    else:
-        plt.scatter(sample[0], sample[1], s=120, marker='+', linewidths=2)
-
 # Add our test samples
 plt.scatter(2, 2, s=120, marker='_', linewidths=2, color='yellow')
 plt.scatter(4, 3, s=120, marker='+', linewidths=2, color='blue')
 plt.show()
 
+w = svm_sgd_plot(X, y)
 # Print the hyperplane calculated by svm_sgd()
 x2 = [w[0], w[1], -w[1], w[0]]
 x3 = [w[0], w[1], w[1], -w[0]]
@@ -94,3 +84,6 @@ X, Y, U, V = zip(*x2x3)
 ax = plt.gca()
 ax.quiver(X, Y, U, V, scale=1, color='blue')
 
+
+vis_data()
+plt.show()

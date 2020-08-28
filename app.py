@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-
+import time
 from flask import Flask, render_template, jsonify, request
 import json
 import sys
@@ -19,9 +19,10 @@ assert sys.version_info.major == 3, global_var.get_error_python_version()
 
 def connect_sensors():
     client.loop_start()
-    client.connect("test.mosquitto.org", 1883, 60)
+    val = client.connect("test.mosquitto.org", 1883, 60)
     client.disconnect()
     client.loop_stop()
+    return val
 
 
 def read_json_file(json_file):
@@ -101,6 +102,15 @@ def get_all_metrics():
             return jsonify(metrics)
         except:
             return db.return_message(None)
+
+
+@app.route('/live', methods=['GET'])
+def get_live_metrics():
+    try:
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        return jsonify([connect_sensors(), current_time])
+    except:
+        return db.return_message(None)
 
 
 @app.route('/history', methods=['GET'])
@@ -329,4 +339,4 @@ def add_header(resp):
 
 
 if __name__ == '__ main__':
-    app.run(host='localhost', threaded=True)
+    app.run(host='0.0.0.0', port=5000, threaded=True, debug=False)

@@ -5,7 +5,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
 
-bankdata = pd.read_csv("D:/Thesis/Test/AI/Dataset/bill_authentication.csv")
+bankdata = pd.read_csv("E:/Thesis/iFASTATHANU-Flask-Python/AI/Dataset/bill_authentication.csv")
 
 X = bankdata.drop('Class', axis=1)
 y = bankdata['Class']
