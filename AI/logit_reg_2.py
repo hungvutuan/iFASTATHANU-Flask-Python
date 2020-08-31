@@ -72,7 +72,7 @@ x = oneHot.transform(x_orig).toarray()
 oneHot.fit(y_orig)
 y_orig = oneHot.transform(y_orig).toarray()
 
-alpha, epochs = 0.5, 1800
+alpha, epochs = 0.5, 200
 m, n = x.shape
 print('m =', m)
 print('n =', n)
@@ -120,7 +120,6 @@ with tf.compat.v1.Session() as sess:
     # Iterating through all the epochs
     for epoch in range(epochs):
         cost_per_epoch = 0
-
         # Running the Optimizer
         sess.run(optimizer, feed_dict={X: x, Y: y_orig})
 
@@ -128,10 +127,8 @@ with tf.compat.v1.Session() as sess:
         c = sess.run(cost, feed_dict={X: x, Y: y_orig})
 
         # Calculating accuracy on current Epoch
-        correct_prediction = tf.equal(tf.argmax(Y_hat, 1),
-                                      tf.argmax(Y, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction,
-                                          tf.float32))
+        correct_prediction = tf.equal(tf.argmax(Y_hat, 1), tf.argmax(Y, 1))
+        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
         # Storing Cost and Accuracy to the history
         cost_history.append(sum(sum(c)))
@@ -144,13 +141,10 @@ with tf.compat.v1.Session() as sess:
 
     Weight = sess.run(W)  # Optimized Weight
     Bias = sess.run(b)  # Optimized Bias
-    # Bias = -0.4
 
     # Final Accuracy
-    correct_prediction = tf.equal(tf.argmax(Y_hat, 1),
-                                  tf.argmax(Y, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction,
-                                      tf.float32))
+    correct_prediction = tf.equal(tf.argmax(Y_hat, 1), tf.argmax(Y, 1))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     print("\nAccuracy:", accuracy_history[-1], "%")
 
 plt.plot(list(range(epochs)), accuracy_history)
@@ -164,8 +158,7 @@ plt.show()
 decision_boundary_x = np.array([np.min(x_orig[:, 0]),
                                 np.max(x_orig[:, 0])])
 
-decision_boundary_y = (- 1.0 / Weight[0]) * \
-                      (decision_boundary_x * Weight + Bias)
+decision_boundary_y = (- 1.0 / Weight[0]) * (decision_boundary_x * Weight + Bias)
 
 decision_boundary_y = [sum(decision_boundary_y[:, 0]), sum(decision_boundary_y[:, 1])]
 
@@ -183,9 +176,10 @@ plt.scatter(x_neg[:, 0], x_neg[:, 1], color='red', label='Negative')
 
 # Plotting the Decision Boundary
 plt.plot(decision_boundary_x, decision_boundary_y)
-plt.xlabel('Feature 1')
-plt.ylabel('Feature 2')
+plt.xlabel('Fire ')
+plt.ylabel('Smoke')
 plt.title('Plot of Decision Boundary')
+
 plt.legend()
 
 axes = plt.gca()
