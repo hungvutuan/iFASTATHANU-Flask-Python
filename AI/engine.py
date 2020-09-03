@@ -22,8 +22,8 @@ def append_bias(array, bias: float):
 work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
 
 # Set dataset
-fire = np.genfromtxt(work_dir + "/Dataset/fire.csv", delimiter=',', )
-non_fire = np.genfromtxt(work_dir + "/Dataset/non-fire.csv", delimiter=',', )
+fire = np.genfromtxt(work_dir + "/Dataset/fire_1.csv", delimiter=',', )
+non_fire = np.genfromtxt(work_dir + "/Dataset/non-fire_1.csv", delimiter=',', )
 
 # add bias term as a vector
 bias = 4
