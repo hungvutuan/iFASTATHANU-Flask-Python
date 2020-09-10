@@ -11,6 +11,7 @@ from sklearn.preprocessing import OneHotEncoder
 work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
 # data = pd.read_csv(work_dir+'/Dataset/dataset_iris.csv', header=None)
 time_iter = 0.0454
+val = []
 
 tf.compat.v1.disable_eager_execution()
 
@@ -22,6 +23,12 @@ non_fire = np.genfromtxt(work_dir + "/Dataset/non-fire.csv", delimiter=',', )
 fire = np.delete(fire, 0, 1)
 non_fire = np.delete(non_fire, 0, 1)
 x_orig = np.append(fire, non_fire, 0)
+for row in x_orig:
+    for col in range(len(row)):
+        if col == 0:
+            row[col] = row[col] - 70
+        if col == 1:
+            row[col] = row[col] - 40
 
 y_orig = np.array([])
 
@@ -68,7 +75,7 @@ x = oneHot.transform(x_orig).toarray()
 oneHot.fit(y_orig)
 y = oneHot.transform(y_orig).toarray()
 
-alpha, epochs = 0.5, 200
+alpha, epochs = 0.5, 300
 m, n = x.shape
 print('m =', m)
 print('n =', n)
@@ -144,8 +151,13 @@ def train():
         correct_prediction = tf.equal(tf.argmax(Y_hat, 1), tf.argmax(Y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print("\nAccuracy:", accuracy_history[-1], "%")
-        tf.print(Weight)
 
+    # visualize(cost_history, accuracy_history, Weight, Bias)
+
+    return [Weight, Bias]
+
+
+def visualize(cost_history, accuracy_history, Weight, Bias):
     plt.plot(list(range(epochs)), cost_history)
     plt.xlabel('Epochs')
     plt.ylabel('Cost')
@@ -194,18 +206,8 @@ def train():
     plt.show()
     plt.clf()
 
-train()
-# def get_x_orig():
-#     return Train.x_orig
-#
-# def get_y_orig():
-#     return Train.y_orig
-#
-# def get_weight():
-#     return Train.Weight
-#
-# def get_bias():
-#     return Train.Bias
+
+val = train()
 
 
 
