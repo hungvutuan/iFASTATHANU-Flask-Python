@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
+import threading
 import time
+from threading import Thread
+
 from flask import Flask, render_template, jsonify, request
-import json
 import sys
 from mysql.connector import DatabaseError
-from Client import client
+from werkzeug.exceptions import InternalServerError
+
+from Client import *
 from database import database as db
 from bin import decorator_serverboot as decorator, global_var
 
@@ -23,6 +27,14 @@ def connect_sensors():
     client.disconnect()
     client.loop_stop()
     return val
+
+
+# def get_sensors_metrics:
+#     time.sleep(3)
+#     for i in range(5):
+#         print("Kitchen:", sensor_data_kitchen)
+#         print("Bedroom:", sensor_data_bedroom)
+#         print("Living:", sensor_data_living)
 
 
 def read_json_file(json_file):
@@ -100,17 +112,38 @@ def get_all_metrics():
     if request.method == 'GET':
         try:
             return jsonify(metrics)
-        except:
-            return db.return_message(None)
+        except Exception:
+            raise InternalServerError
 
 
-@app.route('/live', methods=['GET'])
-def get_live_metrics():
+@app.route('/live/kitchen', methods=['GET'])
+def get_live_kitchen_metrics():
     try:
         current_time = time.strftime("%H:%M:%S", time.localtime())
-        return jsonify([connect_sensors(), current_time])
-    except:
-        return db.return_message(None)
+        sensor_data_kitchen["current_time"] = current_time
+        return jsonify(sensor_data_kitchen)
+    except Exception:
+        raise InternalServerError
+
+
+@app.route('/live/bedroom', methods=['GET'])
+def get_live_bedroom_metrics():
+    try:
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        sensor_data_kitchen["current_time"] = current_time
+        return jsonify(sensor_data_bedroom)
+    except Exception:
+        raise InternalServerError
+
+
+@app.route('/live/livingroom', methods=['GET'])
+def get_live_livingroom_metrics():
+    try:
+        current_time = time.strftime("%H:%M:%S", time.localtime())
+        sensor_data_kitchen["current_time"] = current_time
+        return jsonify(sensor_data_living)
+    except Exception:
+        raise InternalServerError
 
 
 @app.route('/history', methods=['GET'])
@@ -124,7 +157,7 @@ def get_history():
                 return db.get_history_sensor_by_id(history_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/sensors/gas', methods=['GET'])
@@ -137,7 +170,7 @@ def get_gas_sensor():
             return db.get_gas_sensor_by_id(gas_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/sensors/smoke', methods=['GET'])
@@ -150,7 +183,7 @@ def get_smoke_sensor():
             return db.get_smoke_sensor_by_id(smoke_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/sensors/temp', methods=['GET'])
@@ -163,7 +196,7 @@ def get_temp_sensor():
             return db.get_temp_sensor_by_id(temp_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/sensors/loc', methods=['GET'])
@@ -176,7 +209,7 @@ def get_sensor_loc():
             return db.get_sensor_loc_by_id(loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/devices', methods=['GET'])
@@ -189,7 +222,7 @@ def get_device():
             return db.get_device_by_id(device_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 # Add/Insert
@@ -206,7 +239,7 @@ def insert_device():
             return db.insert_device(device_name, device_type, device_loc_id, smoke_id, gas_id, temp_id)
         except DatabaseError as e:
             app.logger.exception(e)
-            return db.get_fail_db_message()
+            raise InternalServerError
 
 
 @app.route('/sensors/smoke/', methods=['POST'])
@@ -217,7 +250,7 @@ def insert_smoke_sensor():
         return db.insert_smoke_sensor(smoke_name, loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/sensors/loc/', methods=['POST'])
@@ -227,7 +260,7 @@ def insert_loc_sensor():
         return db.insert_sensor_loc(loc_name)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/sensors/gas/', methods=['POST'])
@@ -238,7 +271,7 @@ def insert_gas_sensor():
         return db.insert_gas_sensor(gas_name, loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/sensors/temp/', methods=['POST'])
@@ -249,7 +282,7 @@ def insert_temp_sensor():
         return db.insert_temp_sensor(temp_name, loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route('/history', methods=['POST'])
@@ -267,7 +300,7 @@ def insert_history_sensor():
                                         smoke_id, gas_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 # Delete by id
@@ -278,7 +311,7 @@ def delete_device():
         return db.delete_device_by_id(device_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route("/history", methods=['DELETE'])
@@ -288,7 +321,7 @@ def delete_history():
         return db.delete_history_sensor_by_id(history_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route("/sensors/gas", methods=['DELETE'])
@@ -298,7 +331,7 @@ def delete_sensor_gas():
         return db.delete_gas_sensor_by_id(gas_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route("/sensors/smoke", methods=['DELETE'])
@@ -308,7 +341,7 @@ def delete_sensor_smoke():
         return db.delete_smoke_sensor_by_id(smoke_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route("/sensors/temp", methods=['DELETE'])
@@ -318,7 +351,7 @@ def delete_sensor_temp():
         return db.delete_temp_sensor_by_id(temp_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
 
 
 @app.route("/sensors/loc", methods=['DELETE'])
@@ -328,7 +361,18 @@ def delete_sensor_loc():
         return db.delete_sensor_loc_by_id(loc_id)
     except DatabaseError as e:
         app.logger.exception(e)
-        return db.get_fail_db_message()
+        raise InternalServerError
+
+
+@app.route("/notification/feedback", methods=['POST'])
+def get_user_feedback():
+    try:
+        data = request.get_json()
+        print(data)
+        return data
+    except Exception:
+        raise InternalServerError
+
 
 
 @app.after_request
