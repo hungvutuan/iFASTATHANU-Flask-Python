@@ -61,6 +61,16 @@ create table temp_sensor(
     foreign key (loc_id) references sensor_loc(loc_id)
 );
 
+create table history_fire(
+	fire_id  		int not null auto_increment,
+    fire_date 		date,
+    fire_percentage	int default 0,
+    loc_id          int,
+    primary key (fire_id),
+    foreign key (loc_id) references sensor_loc(loc_id)
+);
+
+
 create table history_sensor(
 	history_id 		int not null auto_increment,
     device_id 		int not null, -- we get the location from the device
@@ -87,35 +97,38 @@ create table history_sensor(
 --     primary key (reading_id)
 -- );
 
-insert into sensor_loc(loc_name) values('VGU Binh Duong');
-insert into sensor_loc(loc_name) values('Bosch Cong Hoa');
+insert into sensor_loc(loc_name) values('Bedroom');
+insert into sensor_loc(loc_name) values('Living room');
+insert into sensor_loc(loc_name) values('Kitchen');
 
 insert into alarm(alarm_status)
 	values 	('Fire');
 insert into alarm(alarm_status)
-	values 	('Imminent');
+	values 	('Prominent');
 insert into alarm(alarm_status)
 	values 	('Safe');
 
 
 INSERT INTO DEVICE (device_name, device_type, device_loc_id, smoke_id, gas_id, temp_id)
-	VALUES	('Home sensor', 'Raspberry Pi', 1, '01', '01', '01');
+	VALUES	('Bedroom sensor', 'Raspberry Pi', 1, '01', '01', '01');
 INSERT INTO DEVICE (device_name, device_type, device_loc_id, smoke_id, gas_id, temp_id)
-	VALUES	('Wokrplace-1', 'Raspberry Pi', 2, '02', '02', '02');
+	VALUES	('Kitchen-1', 'Raspberry Pi', 2, '02', '02', '02');
 
 insert into smoke_sensor(smoke_name, loc_id)
-	values	('Restroom sensor', 1);
+	values	('Kitchen sensor', 1);
 insert into temp_sensor(temp_name, loc_id)
-	values	('Restroom sensor', 1);
+	values	('Kitchen sensor', 1);
 insert into gas_sensor(gas_name, loc_id)
-	values 	('Restroom sensor', 1);
+	values 	('Kitchen sensor', 1);
 
 -- pseudo values for history
 insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
-	values	(1, 10, 20, 30, "2008-04-15", 1, 1, 1, 1);
+	values	(1, 10, 20, 30, "2020-04-15", 1, 1, 1, 1);
 insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
-	values	(1, 10, 20, 30, "2008-04-15", 1, 1, 1, 1);
+	values	(1, 10, 20, 30, "2020-04-15", 1, 1, 1, 1);
 
+insert into history_fire(fire_date, fire_percentage, loc_id)
+	values ("2020-12-10", 14, 1);
 
 select history_id, alarm_status, loc_name, device_name, date_reading, alarm_type
 from history_sensor h join alarm a on h.alarm_id = a.alarm_id

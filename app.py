@@ -37,6 +37,13 @@ def connect_sensors():
 #         print("Living:", sensor_data_living)
 
 
+def get_current_time():
+    return time.strftime("%H:%M:%S", time.localtime())
+
+def get_current_date():
+
+
+
 def read_json_file(json_file):
     """Read *.json files"""
     with open(json_file, 'r') as _metrics:
@@ -119,7 +126,7 @@ def get_all_metrics():
 @app.route('/live/kitchen', methods=['GET'])
 def get_live_kitchen_metrics():
     try:
-        current_time = time.strftime("%H:%M:%S", time.localtime())
+        current_time = get_current_time()
         sensor_data_kitchen["current_time"] = current_time
         return jsonify(sensor_data_kitchen)
     except Exception:
@@ -129,7 +136,7 @@ def get_live_kitchen_metrics():
 @app.route('/live/bedroom', methods=['GET'])
 def get_live_bedroom_metrics():
     try:
-        current_time = time.strftime("%H:%M:%S", time.localtime())
+        current_time = get_current_time()
         sensor_data_kitchen["current_time"] = current_time
         return jsonify(sensor_data_bedroom)
     except Exception:
@@ -139,7 +146,7 @@ def get_live_bedroom_metrics():
 @app.route('/live/livingroom', methods=['GET'])
 def get_live_livingroom_metrics():
     try:
-        current_time = time.strftime("%H:%M:%S", time.localtime())
+        current_time = get_current_time()
         sensor_data_kitchen["current_time"] = current_time
         return jsonify(sensor_data_living)
     except Exception:
@@ -364,6 +371,23 @@ def delete_sensor_loc():
         raise InternalServerError
 
 
+@app.route("/piechart", methods=['GET'])
+def get_pie_chart():
+    try:
+        current_time = get_current_time()
+        cur_month = current_time.split()
+    except Exception:
+        raise InternalServerError
+
+
+# @app.route("/barchart", methods=['GET'])
+# def get_bar_chart():
+#     try:
+#
+#     except Exception:
+#         raise InternalServerError
+
+
 @app.route("/notification/feedback", methods=['POST'])
 def get_user_feedback():
     try:
@@ -372,7 +396,6 @@ def get_user_feedback():
         return data
     except Exception:
         raise InternalServerError
-
 
 
 @app.after_request
