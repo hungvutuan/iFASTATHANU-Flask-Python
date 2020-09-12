@@ -57,7 +57,7 @@ _calc = calc(fire_val)
 print("Result: ", _calc * 100)
 
 # a = r.sigmoid(fire_val[0]+)
-Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(np.transpose(weight), x), bias))
+Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(np.transpose(weight), fire_val), bias))
 with tf.compat.v1.Session() as sess:
     sess.run(init)
     y_hat = sess.run(Y_hat)

@@ -3,6 +3,7 @@ import json
 import datetime
 from flask import jsonify
 import DTO
+from bin import global_var as VAR
 
 # select all
 query_get_all_history_sensor = "select history_id, alarm_status, loc_name, device_name, date_reading, alarm_type " \
@@ -267,3 +268,35 @@ def get_device_by_id(device_id):
     return handle_select_query(query_get_device_by_id, DTO.get_dto_device(), device_id)
 
 
+# GET charts
+def get_pie_chart():
+    fire_count = 0
+    safe_count = 0
+    prominent_count = 0
+    hists = handle_select_query(query_get_all_history_sensor, DTO.get_dto_history_sensor()).json
+
+    for hist in hists:
+        if hist["alarm_status"].lower() == VAR.FIRE.lower():
+            fire_count += 1
+        elif hist["alarm_status"].lower() == VAR.SAFE.lower():
+            safe_count += 1
+        elif hist["alarm_status"].lower() == VAR.PROMINENT.lower():
+            prominent_count += 1
+
+    return jsonify({
+        VAR.FIRE: fire_count,
+        VAR.SAFE: safe_count,
+        VAR.PROMINENT: prominent_count
+    })
+
+
+def get_bar_chart(cur_month):
+    months = [i + 1 for i in range(12)]
+    last_6 = []
+
+    if cur_month >= 6:
+        last_6 = months[cur_month - 6:cur_month]
+    else:
+        months[:cur_month].extend(months[cur_month + 6:])
+        last_6 = months
+    return jsonify(last_6)

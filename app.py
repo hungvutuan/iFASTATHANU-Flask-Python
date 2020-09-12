@@ -3,6 +3,7 @@
 import threading
 import time
 from threading import Thread
+from datetime import date
 
 from flask import Flask, render_template, jsonify, request
 import sys
@@ -40,8 +41,9 @@ def connect_sensors():
 def get_current_time():
     return time.strftime("%H:%M:%S", time.localtime())
 
-def get_current_date():
 
+def get_current_date():
+    return date.today().strftime("%Y-%m-%d")
 
 
 def read_json_file(json_file):
@@ -372,20 +374,20 @@ def delete_sensor_loc():
 
 
 @app.route("/piechart", methods=['GET'])
-def get_pie_chart():
+def get_pie():
     try:
-        current_time = get_current_time()
-        cur_month = current_time.split()
+        return db.get_pie_chart()
     except Exception:
         raise InternalServerError
 
 
-# @app.route("/barchart", methods=['GET'])
-# def get_bar_chart():
-#     try:
-#
-#     except Exception:
-#         raise InternalServerError
+@app.route("/barchart", methods=['GET'])
+def get_bar_chart():
+    try:
+        cur_month = int(get_current_date().split("-")[1])
+        return db.get_bar_chart(5)
+    except Exception:
+        raise InternalServerError
 
 
 @app.route("/notification/feedback", methods=['POST'])
@@ -400,7 +402,7 @@ def get_user_feedback():
 
 @app.after_request
 def add_header(resp):
-    resp.headers['Allow'] = "POST, GET"
+    resp.headers['Allow'] = "POST, GET, DELETE"
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 
