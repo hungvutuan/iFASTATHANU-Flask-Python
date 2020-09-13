@@ -286,17 +286,47 @@ def get_pie_chart():
     return jsonify({
         VAR.FIRE: fire_count,
         VAR.SAFE: safe_count,
-        VAR.PROMINENT: prominent_count
+        VAR.PROMINENT: prominent_count,
+        "total": fire_count + safe_count + prominent_count
     })
 
 
-def get_bar_chart(cur_month):
+def get_last_6_months(cur_month):
     months = [i + 1 for i in range(12)]
-    last_6 = []
 
     if cur_month >= 6:
         last_6 = months[cur_month - 6:cur_month]
     else:
-        months[:cur_month].extend(months[cur_month + 6:])
-        last_6 = months
-    return jsonify(last_6)
+        last_6 = months[cur_month + 6:]
+        last_6.extend(months[:cur_month])
+    return last_6
+
+
+def get_bar_chart(cur_month):
+    hists = handle_select_query(query_get_all_history_sensor, DTO.get_dto_history_sensor()).json
+    last_6 = get_last_6_months(cur_month)
+    last_6_val = [0] * 6
+    fire = {}
+
+    for i in range(6):
+        fire[last_6[i]] = last_6_val[i]
+
+    for hist in hists:
+        month = int(hist["date_reading"].split("-")[1])
+        if hist['alarm_status'].lower() == VAR.FIRE.lower():
+            for k in fire.keys():
+                if month == k:
+                    fire[k] += 1
+
+    translated_fire = month_int_to_str(fire)
+    return jsonify(translated_fire)
+
+
+def month_int_to_str(fire):
+    str_months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    new_fire = {}
+
+    for k in fire.keys():
+        new_fire[str_months[int(k) - 1]] = fire[k]
+
+    return new_fire

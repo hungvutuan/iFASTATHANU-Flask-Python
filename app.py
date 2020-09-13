@@ -5,10 +5,12 @@ import time
 from threading import Thread
 from datetime import date
 
+
 from flask import Flask, render_template, jsonify, request
 import sys
 from mysql.connector import DatabaseError
 from werkzeug.exceptions import InternalServerError
+from pyfcm import FCMNotification
 
 from Client import *
 from database import database as db
@@ -385,7 +387,7 @@ def get_pie():
 def get_bar_chart():
     try:
         cur_month = int(get_current_date().split("-")[1])
-        return db.get_bar_chart(5)
+        return db.get_bar_chart(cur_month)
     except Exception:
         raise InternalServerError
 
@@ -393,9 +395,54 @@ def get_bar_chart():
 @app.route("/notification/feedback", methods=['POST'])
 def get_user_feedback():
     try:
-        data = request.get_json()
-        print(data)
-        return data
+        data = request.get_data().decode("utf-8")
+
+        return db.return_message("Received")
+    except Exception:
+        raise InternalServerError
+
+# def feedback(data):
+#     if data["correct"]:
+
+
+
+
+@app.route("/notification/firebase", methods=['POST'])
+def notification():
+    try:
+        # declare a FCMNotification instance, which is then packed with a body to send to Firebase
+        push_service = FCMNotification(
+            api_key="AAAAh8zZKmc:APA91bHCM7OfYaJZUAPA"
+                    "-GVGTPpQMYpbi1RBIWCf4CtBAwpTArWQ_Na0Kla2PX7frNWBqnRtOQqb"
+                    "Gq4khJVzgSheNQguJFjLpLKxrrH7nPjJwuzrpzN1J8NGztJ-NYyb-DEYI_8Ef5lB")
+
+        # attributes for the notification
+        message_title = "default-title"
+        message_body = "default-body"
+        data_message = {
+            "temperature": "50",
+            "smoke": "60",
+            "bookid": "booktarget.pk",
+            "multimediaurl": "multimediaused.url"
+        }
+
+        # send the notification to the mobile device(s)
+        push_service.notify_topic_subscribers(
+            topic_name="fireDetection",
+            message_title=message_title,
+            message_body=message_body,
+            data_message=data_message,
+        )
+        return db.return_message("Noti sent")
+
+    except Exception:
+        raise InternalServerError
+
+
+@app.route("/prediction", methods=['GET'])
+def get_percentage():
+    try:
+        return jsonify(55)
     except Exception:
         raise InternalServerError
 
