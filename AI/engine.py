@@ -1,8 +1,14 @@
 import sys
+import threading
+
 import matplotlib.pyplot as plt
+from pyfcm import FCMNotification
+
 from AI import logit_reg_2 as r
 import tensorflow as tf
 import numpy as np
+
+from Client import *
 
 init = tf.compat.v1.global_variables_initializer()
 weight = r.val[0]
@@ -56,12 +62,48 @@ plt.show()
 _calc = calc(fire_val)
 print("Result: ", _calc * 100)
 
+
 # a = r.sigmoid(fire_val[0]+)
-Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(np.transpose(weight), fire_val), bias))
-with tf.compat.v1.Session() as sess:
-    sess.run(init)
-    y_hat = sess.run(Y_hat)
-    print(y_hat)
+# Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(np.transpose(weight), fire_val), bias))
+# with tf.compat.v1.Session() as sess:
+#     sess.run(init)
+#     y_hat = sess.run(Y_hat)
+#     print(y_hat)
+#
+# print("Done")
 
-print("Done")
 
+def check_input(val: dict):
+    for room, info in val.items():
+        check_val = [info["temperature"], info["smoke"]]
+        c = calc(check_val)
+        print("Percentage:",c, end=" ")
+        if c > 0.5:
+            send_noti(room, check_val)
+
+
+def send_noti(room, check_val: list):
+    # declare a FCMNotification instance, which is then packed with a body to send to Firebase
+    push_service = FCMNotification(
+        api_key="AAAAh8zZKmc:APA91bHCM7OfYaJZUAPA"
+                "-GVGTPpQMYpbi1RBIWCf4CtBAwpTArWQ_Na0Kla2PX7frNWBqnRtOQqb"
+                "Gq4khJVzgSheNQguJFjLpLKxrrH7nPjJwuzrpzN1J8NGztJ-NYyb-DEYI_8Ef5lB")
+
+    # attributes for the notification
+    message_title = "Fire hazard"
+    message_body = "from your " + room + " was detected"
+    data_message = {
+        "temperature": check_val[0],
+        "smoke": check_val[1],
+        "room": room
+    }
+
+    # send the notification to the mobile device(s)
+    push_service.notify_topic_subscribers(
+        topic_name="fireDetection",
+        message_title=message_title,
+        message_body=message_body,
+        data_message=data_message
+    )
+
+    print("Alert sent")

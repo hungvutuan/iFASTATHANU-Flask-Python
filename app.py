@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 # coding: utf-8
+import random
 import threading
 import time
 from threading import Thread
 from datetime import date
 
-
 from flask import Flask, render_template, jsonify, request
 import sys
 from mysql.connector import DatabaseError
 from werkzeug.exceptions import InternalServerError
-from pyfcm import FCMNotification
 
 from Client import *
 from database import database as db
 from bin import decorator_serverboot as decorator, global_var
+
+from AI import engine
 
 app = Flask(__name__)
 app.secret_key = "4,\x178sg\xde=U=\xa7\xe5Hr\x11\xaf"
@@ -32,12 +33,14 @@ def connect_sensors():
     return val
 
 
-# def get_sensors_metrics:
+# def get_sensors_metrics():
 #     time.sleep(3)
 #     for i in range(5):
 #         print("Kitchen:", sensor_data_kitchen)
-#         print("Bedroom:", sensor_data_bedroom)
-#         print("Living:", sensor_data_living)
+#         time.sleep(1)
+#         # print("Bedroom:", sensor_data_bedroom)
+#         # print("Living:", sensor_data_living)
+# get_sensors_metrics()
 
 
 def get_current_time():
@@ -401,38 +404,43 @@ def get_user_feedback():
     except Exception:
         raise InternalServerError
 
-# def feedback(data):
-#     if data["correct"]:
+
+# todo
+class LiveInput(threading.Thread):
+    """Retrieve the input from the 3 pairs of sensors with a delay"""
+
+    def __init__(self, delay):
+        threading.Thread.__init__(self)
+        self.delay = delay
+
+    def run(self):
+        while True:
+            time.sleep(self.delay)
+
+            # randomize values
+            # engine.check_input({
+            #     "kitchen": {
+            #         "temperature": random.randint(0, 50),
+            #         "smoke": random.randint(0, 120)
+            #     },
+            # })
+
+            # get values from
+            engine.check_input({
+                "kitchen": sensor_data_kitchen,
+                "bedroom": sensor_data_bedroom,
+                "living": sensor_data_living
+            })
 
 
+program = LiveInput(60)
+program.start()
 
 
 @app.route("/notification/firebase", methods=['POST'])
 def notification():
     try:
-        # declare a FCMNotification instance, which is then packed with a body to send to Firebase
-        push_service = FCMNotification(
-            api_key="AAAAh8zZKmc:APA91bHCM7OfYaJZUAPA"
-                    "-GVGTPpQMYpbi1RBIWCf4CtBAwpTArWQ_Na0Kla2PX7frNWBqnRtOQqb"
-                    "Gq4khJVzgSheNQguJFjLpLKxrrH7nPjJwuzrpzN1J8NGztJ-NYyb-DEYI_8Ef5lB")
 
-        # attributes for the notification
-        message_title = "default-title"
-        message_body = "default-body"
-        data_message = {
-            "temperature": "50",
-            "smoke": "60",
-            "bookid": "booktarget.pk",
-            "multimediaurl": "multimediaused.url"
-        }
-
-        # send the notification to the mobile device(s)
-        push_service.notify_topic_subscribers(
-            topic_name="fireDetection",
-            message_title=message_title,
-            message_body=message_body,
-            data_message=data_message,
-        )
         return db.return_message("Noti sent")
 
     except Exception:
