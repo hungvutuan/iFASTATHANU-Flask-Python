@@ -272,7 +272,7 @@ def get_device_by_id(device_id):
 def get_pie_chart():
     fire_count = 0
     safe_count = 0
-    prominent_count = 0
+    imminent_count = 0
     hists = handle_select_query(query_get_all_history_sensor, DTO.get_dto_history_sensor()).json
 
     for hist in hists:
@@ -280,14 +280,14 @@ def get_pie_chart():
             fire_count += 1
         elif hist["alarm_status"].lower() == VAR.SAFE.lower():
             safe_count += 1
-        elif hist["alarm_status"].lower() == VAR.PROMINENT.lower():
-            prominent_count += 1
+        elif hist["alarm_status"].lower() == VAR.IMMINENT.lower():
+            imminent_count += 1
 
     return jsonify({
         VAR.FIRE: fire_count,
         VAR.SAFE: safe_count,
-        VAR.PROMINENT: prominent_count,
-        "total": fire_count + safe_count + prominent_count
+        VAR.IMMINENT: imminent_count,
+        "total": fire_count + safe_count + imminent_count
     })
 
 

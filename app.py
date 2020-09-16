@@ -13,7 +13,7 @@ from werkzeug.exceptions import InternalServerError
 
 from Client import *
 from database import database as db
-from bin import decorator_serverboot as decorator, global_var
+from bin import decorator_serverboot as decorator, global_var as VAR
 
 from AI import engine
 
@@ -22,7 +22,7 @@ app.secret_key = "4,\x178sg\xde=U=\xa7\xe5Hr\x11\xaf"
 decorator.decorate()
 
 # Confirm that we're using Python 3
-assert sys.version_info.major == 3, global_var.get_error_python_version()
+assert sys.version_info.major == 3, VAR.get_error_python_version()
 
 
 def connect_sensors():
@@ -31,16 +31,6 @@ def connect_sensors():
     client.disconnect()
     client.loop_stop()
     return val
-
-
-# def get_sensors_metrics():
-#     time.sleep(3)
-#     for i in range(5):
-#         print("Kitchen:", sensor_data_kitchen)
-#         time.sleep(1)
-#         # print("Bedroom:", sensor_data_bedroom)
-#         # print("Living:", sensor_data_living)
-# get_sensors_metrics()
 
 
 def get_current_time():
@@ -395,19 +385,11 @@ def get_bar_chart():
         raise InternalServerError
 
 
-@app.route("/notification/feedback", methods=['POST'])
-def get_user_feedback():
-    try:
-        data = request.get_data().decode("utf-8")
-
-        return db.return_message("Received")
-    except Exception:
-        raise InternalServerError
-
-
-# todo
 class LiveInput(threading.Thread):
-    """Retrieve the input from the 3 pairs of sensors with a delay"""
+    """Retrieve the input from the 3 pairs of sensors with a delay.
+    This class is never called by the API.
+    Purpose: Request the inputs in the background, and pass to the ML engine.
+    If high chance of fire -> send notification to mobile. If not, do nothing."""
 
     def __init__(self, delay):
         threading.Thread.__init__(self)
@@ -415,42 +397,49 @@ class LiveInput(threading.Thread):
 
     def run(self):
         while True:
-            time.sleep(self.delay)
-
-            # randomize values
-            # engine.check_input({
-            #     "kitchen": {
-            #         "temperature": random.randint(0, 50),
-            #         "smoke": random.randint(0, 120)
-            #     },
-            # })
-
-            # get values from
+            # get values from sensors
             engine.check_input({
                 "kitchen": sensor_data_kitchen,
                 "bedroom": sensor_data_bedroom,
                 "living": sensor_data_living
             })
+            time.sleep(self.delay)
 
 
-program = LiveInput(60)
-program.start()
+retrieve_input = LiveInput(20)
+retrieve_input.start()
 
 
+# todo
 @app.route("/notification/firebase", methods=['POST'])
 def notification():
     try:
 
         return db.return_message("Noti sent")
-
     except Exception:
         raise InternalServerError
 
 
+# todo
 @app.route("/prediction", methods=['GET'])
 def get_percentage():
     try:
-        return jsonify(55)
+        return jsonify({
+            "kitchen": engine.feed(sensor_data_kitchen),
+            "bedroom": engine.feed(sensor_data_bedroom),
+            "living": engine.feed(sensor_data_living)
+        })
+    except Exception:
+        raise InternalServerError
+
+
+# todo
+@app.route("/notification/feedback", methods=['POST'])
+def get_user_feedback():
+    try:
+        data = json.dumps(request.get_data().decode("utf-8"))
+
+        return engine.feedback(data["temperature"], data["smoke"])
     except Exception:
         raise InternalServerError
 
