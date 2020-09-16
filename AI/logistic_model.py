@@ -1,13 +1,18 @@
 # importing modules
 import os
+import sys
+from shutil import copyfile, move, SameFileError
 
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
+from werkzeug.exceptions import InternalServerError
+
+from bin import global_var as VAR
 
 work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
-# data = pd.read_csv(work_dir+'/Dataset/dataset_iris.csv', header=None)
+print(work_dir)
 time_iter = 0.0454
 val = []
 
@@ -24,9 +29,9 @@ x_orig = np.append(fire, non_fire, 0)
 for row in x_orig:
     for col in range(len(row)):
         if col == 0:
-            row[col] = row[col] - 70
+            row[col] = row[col] - VAR.TEMP_OFFSET
         if col == 1:
-            row[col] = row[col] - 40
+            row[col] = row[col] - VAR.SMOKE_OFFSET
 
 y_orig = np.array([])
 
@@ -49,19 +54,6 @@ x_pos = np.array([x_orig[i] for i in range(len(x_orig)) if y_orig[i] == 1])
 x_neg = np.array([x_orig[i] for i in range(len(x_orig))
                   if y_orig[i] == 0])
 
-# # Plotting the Positive Data Points
-# plt.scatter(x_pos[:, 0], x_pos[:, 1], color='blue', label='Positive')
-#
-# # Plotting the Negative Data Points
-# plt.scatter(x_neg[:, 0], x_neg[:, 1], color='red', label='Negative')
-#
-# plt.xlabel('Feature 1')
-# plt.ylabel('Feature 2')
-# plt.title('Plot of given data')
-# plt.legend()
-#
-# plt.clf()
-
 # Creating the One Hot Encoder
 oneHot = OneHotEncoder()
 
@@ -73,7 +65,7 @@ x = oneHot.transform(x_orig).toarray()
 oneHot.fit(y_orig)
 y = oneHot.transform(y_orig).toarray()
 
-alpha, epochs = 0.5, 300
+alpha, epochs = 0.5, 100
 m, n = x.shape
 print('m =', m)
 print('n =', n)
@@ -101,15 +93,13 @@ Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(X, W), b))
 cost = tf.nn.sigmoid_cross_entropy_with_logits(
     logits=Y_hat, labels=Y)
 
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
-
 # Gradient Descent Optimizer
 optimizer = tf.compat.v1.train.GradientDescentOptimizer(
     learning_rate=alpha).minimize(cost)
 
 # Global Variables Initializer
 init = tf.compat.v1.global_variables_initializer()
+
 
 def train():
     # Starting the Tensorflow Session
@@ -150,7 +140,30 @@ def train():
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print("\nAccuracy:", accuracy_history[-1], "%")
 
+    # visualize data
     # visualize(cost_history, accuracy_history, Weight, Bias)
+
+    # save trained data to a file
+    f = open(VAR.TRAINED_DATA_FILE, "w")
+    for row in Weight:
+        for col in range(Weight.shape[1]):
+            f.write(str(row[col]) + " ")
+        f.write("\n")
+
+    f.write("|") # separator
+    for col in Bias:
+        f.write(str(col) + " ")
+
+    f.close()
+
+    # copy the above file to the mother (top-most) directory
+    src = work_dir + "/" + VAR.TRAINED_DATA_FILE
+    dst = VAR.GLOBAL_DIR + "/" + VAR.TRAINED_DATA_FILE
+    try:
+        copyfile(src, dst)
+    except (SameFileError, IOError):
+        print("Cannot copy the", VAR.TRAINED_DATA_FILE, "file")
+        return VAR.ERROR
 
     return [Weight, Bias]
 
@@ -204,8 +217,5 @@ def visualize(cost_history, accuracy_history, Weight, Bias):
     plt.show()
     plt.clf()
 
-
-val = train()
-
-
-
+train()
+sys.exit(0)

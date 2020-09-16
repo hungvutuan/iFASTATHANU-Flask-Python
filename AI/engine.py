@@ -1,23 +1,29 @@
+import os
 import sys
 import threading
 
 import matplotlib.pyplot as plt
 from pyfcm import FCMNotification
 
-from AI import logit_reg_2 as r
-import tensorflow as tf
 import numpy as np
+from bin import global_var as VAR
 
-from Client import *
+# open the trained file
+f = open(VAR.TRAINED_DATA_FILE, "r")
+f = f.read().split("|")
 
-init = tf.compat.v1.global_variables_initializer()
-weight = r.val[0]
-bias = r.val[1]
+# retrieve data from the "trained data file"
+weight = np.fromstring(f[0], dtype=float, sep=" ")  # convert weight (string) to a vector
+weight = np.reshape(weight, (-1, 2))  # convert vector to a 2D array
+bias = np.fromstring(f[1], dtype=float, sep=" ")  # convert bias (string) to a vector
 
-x_orig = r.x_orig
 x = np.array(np.zeros(weight.shape))
 prediction = np.array(np.zeros(weight.shape[0]))
 holder = 0
+
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
 
 def __calc(val):
@@ -29,72 +35,67 @@ def __calc(val):
     return count[0] + count[1]
 
 
-def calc(val):
-    # total = np.dot(weight[-1], val) + bias
-    total = r.sigmoid(val[0] * weight[-1][0] + bias[0]) + \
-            r.sigmoid(val[1] * weight[-1][1] + bias[1])
-    return total
+def feed(val):
+    total = sigmoid(val[0] * weight[-1][0] + bias[0]) + \
+            sigmoid(val[1] * weight[-1][1] + bias[1]) * 100
+    res = (total - 75) * 4
+    if res < 0:
+        return 0
+    if res > 100:
+        return 100
+    return res
 
 
-for i in range(x.shape[0]):
-    for k in range(x.shape[1]):
-        x[i][k] = r.sigmoid(x_orig[i][k] * weight[i][k] + bias[k])
-
-    prediction[i] = r.sigmoid(x[i][0] + x[i][1])
-
-fire_val = [-27, -5]
-for i in range(len(weight)):
-    holder = holder + \
-             r.sigmoid(
-                 r.sigmoid(fire_val[0] * weight[i][0] + bias[0]) +
-                 r.sigmoid(fire_val[1] * weight[i][1] + bias[1])
-             )
-
-# print(fire_val[0]*)
+fire_val = [55, 16]
+neutral_val = [-20, -5]
+not_fire_val = [-30, -6]
 prediction = np.reshape(prediction, (len(prediction), -1))
 
-# plt.plot(x_orig[:prediction.shape[0]], r.sigmoid(x_orig[:prediction.shape[0]]))
-plt.plot(x_orig[:prediction.shape[0]], x)
-plt.title("Sigmoid for accuracy")
-# plt.legend()
-plt.show()
-
-_calc = calc(fire_val)
-print("Result: ", _calc * 100)
-
-
-# a = r.sigmoid(fire_val[0]+)
-# Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(np.transpose(weight), fire_val), bias))
-# with tf.compat.v1.Session() as sess:
-#     sess.run(init)
-#     y_hat = sess.run(Y_hat)
-#     print(y_hat)
+# for i in range(x.shape[0]):
+#     for k in range(x.shape[1]):
+#         x[i][k] = sigmoid(x_orig[i][k] * weight[i][k] + bias[k])
 #
-# print("Done")
+#     prediction[i] = sigmoid(x[i][0] + x[i][1])
+
+
+# plt.plot(x_orig[:prediction.shape[0]], sigmoid(x_orig[:prediction.shape[0]]))
+# plt.plot(x_orig[:prediction.shape[0]], x)
+# plt.title("Sigmoid for accuracy")
+# plt.show()
+
+print("Fire:", feed(fire_val))
+print("Fire1:", feed([10, 8]))
+print("Neutral:", feed(neutral_val))
+print("Not fire:", feed(not_fire_val), "\n")
 
 
 def check_input(val: dict):
     for room, info in val.items():
-        check_val = [info["temperature"], info["smoke"]]
-        c = calc(check_val)
-        print("Percentage:",c, end=" ")
-        if c > 0.5:
-            send_noti(room, check_val)
+        metrics = [info["temperature"] - VAR.TEMP_OFFSET, info["smoke"] - VAR.SMOKE_OFFSET]
+        chance = feed(metrics)
+        print(room + ":", metrics, "chance:", chance)
+        if chance > VAR.FIRE_BAR:
+            send_noti(room, metrics, chance)
+            # todo
+            # insert to database history a fire
 
 
-def send_noti(room, check_val: list):
-    # declare a FCMNotification instance, which is then packed with a body to send to Firebase
+def send_noti(room, metrics: list, chance):
+    """Declare a FCMNotification instance, which is then packed
+     with a body to send to the Firebase broker"""
+
     push_service = FCMNotification(
         api_key="AAAAh8zZKmc:APA91bHCM7OfYaJZUAPA"
                 "-GVGTPpQMYpbi1RBIWCf4CtBAwpTArWQ_Na0Kla2PX7frNWBqnRtOQqb"
                 "Gq4khJVzgSheNQguJFjLpLKxrrH7nPjJwuzrpzN1J8NGztJ-NYyb-DEYI_8Ef5lB")
 
     # attributes for the notification
-    message_title = "Fire hazard"
+    message_title = "Fire Hazard"
     message_body = "from your " + room + " was detected"
     data_message = {
-        "temperature": check_val[0],
-        "smoke": check_val[1],
+        "chance": chance,
+        "temperature": metrics[0],
+        "smoke": metrics[1],
         "room": room
     }
 
@@ -107,3 +108,6 @@ def send_noti(room, check_val: list):
     )
 
     print("Alert sent")
+
+def feedback(temp, smoke):
+    return 0
