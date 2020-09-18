@@ -1,8 +1,9 @@
-matplotlib.pyplot
+werkzeug
+matplotlib
 paho-mqtt >= 1.5.0
 # This file contains the dependencies that Python must install before running Flask
 flask >= 1.1.2
 mysql-connector-python >= 8.0.20
 tensorflow
-numpy == 1.15.0
+numpy
 pyfcm

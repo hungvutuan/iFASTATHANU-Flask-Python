@@ -9,8 +9,8 @@ SAFE = "Safe"
 FIRE_BAR = 80
 IMMINENT_BAR = 50
 
-TEMP_OFFSET = 70
-SMOKE_OFFSET = 40
+TEMP_OFFSET = 40
+SMOKE_OFFSET = 70
 
 cur_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
 cur_dir_list = cur_dir.split("/")

@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 # coding: utf-8
-import random
+import sys
 import threading
-import time
-from threading import Thread
 from datetime import date
 
 from flask import Flask, render_template, jsonify, request
-import sys
 from mysql.connector import DatabaseError
 from werkzeug.exceptions import InternalServerError
 
-from Client import *
-from database import database as db
-from bin import decorator_serverboot as decorator, global_var as VAR
-
 from AI import engine
+from Client import *
+from bin import decorator_serverboot as decorator, global_var as VAR
+from database import database as db
 
 app = Flask(__name__)
 app.secret_key = "4,\x178sg\xde=U=\xa7\xe5Hr\x11\xaf"
@@ -387,9 +383,9 @@ def get_bar_chart():
 
 class LiveInput(threading.Thread):
     """Retrieve the input from the 3 pairs of sensors with a delay.
-    This class is never called by the API.
+    Description: This class is never called by the API. It loops forever.
     Purpose: Request the inputs in the background, and pass to the ML engine.
-    If high chance of fire -> send notification to mobile. If not, do nothing."""
+    If high chance of fire -> send notification to mobile."""
 
     def __init__(self, delay):
         threading.Thread.__init__(self)
@@ -410,7 +406,7 @@ retrieve_input = LiveInput(20)
 retrieve_input.start()
 
 
-# todo
+# todo ignore
 @app.route("/notification/firebase", methods=['POST'])
 def notification():
     try:
@@ -421,14 +417,34 @@ def notification():
 
 
 # todo
-@app.route("/prediction", methods=['GET'])
-def get_percentage():
+@app.route("/prediction/kitchen", methods=['GET'])
+def get_kitchen_percentage():
     try:
-        return jsonify({
-            "kitchen": engine.feed(sensor_data_kitchen),
-            "bedroom": engine.feed(sensor_data_bedroom),
-            "living": engine.feed(sensor_data_living)
-        })
+        return engine.live_percentage("kitchen", sensor_data_kitchen)
+    except Exception:
+        raise InternalServerError
+
+
+@app.route("/prediction/bedroom", methods=['GET'])
+def get_bedroom_percentage():
+    try:
+        return engine.live_percentage("bedroom", sensor_data_kitchen)
+    except Exception:
+        raise InternalServerError
+
+
+@app.route("/prediction/living", methods=['GET'])
+def get_living_percentage():
+    try:
+        return engine.live_percentage("living", sensor_data_kitchen)
+    except Exception:
+        raise InternalServerError
+
+
+@app.route("/prediction", methods=["GET"])
+def get_mean_percentage():
+    try:
+        return jsonify(engine.mean_live_percentage(sensor_data_kitchen, sensor_data_bedroom, sensor_data_living))
     except Exception:
         raise InternalServerError
 
@@ -439,7 +455,7 @@ def get_user_feedback():
     try:
         data = json.dumps(request.get_data().decode("utf-8"))
 
-        return engine.feedback(data["temperature"], data["smoke"])
+        return engine.feedback(data["temperature"], data["smoke"], status)
     except Exception:
         raise InternalServerError
 

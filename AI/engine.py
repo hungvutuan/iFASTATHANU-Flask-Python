@@ -47,7 +47,7 @@ def feed(val):
 
 
 fire_val = [55, 16]
-neutral_val = [-20, -5]
+neutral_val = [22, -2]
 not_fire_val = [-30, -6]
 prediction = np.reshape(prediction, (len(prediction), -1))
 
@@ -63,15 +63,15 @@ prediction = np.reshape(prediction, (len(prediction), -1))
 # plt.title("Sigmoid for accuracy")
 # plt.show()
 
-print("Fire:", feed(fire_val))
-print("Fire1:", feed([10, 8]))
-print("Neutral:", feed(neutral_val))
-print("Not fire:", feed(not_fire_val), "\n")
+# print("Fire:", feed(fire_val))
+# print("Fire1:", feed([10, 8]))
+# print("Neutral:", feed(neutral_val))
+# print("Not fire:", feed(not_fire_val), "\n")
 
 
 def check_input(val: dict):
     for room, info in val.items():
-        metrics = [info["temperature"] - VAR.TEMP_OFFSET, info["smoke"] - VAR.SMOKE_OFFSET]
+        metrics = metrics_dict_to_list(info)
         chance = feed(metrics)
         print(room + ":", metrics, "chance:", chance)
         if chance > VAR.FIRE_BAR:
@@ -83,7 +83,6 @@ def check_input(val: dict):
 def send_noti(room, metrics: list, chance):
     """Declare a FCMNotification instance, which is then packed
      with a body to send to the Firebase broker"""
-
     push_service = FCMNotification(
         api_key="AAAAh8zZKmc:APA91bHCM7OfYaJZUAPA"
                 "-GVGTPpQMYpbi1RBIWCf4CtBAwpTArWQ_Na0Kla2PX7frNWBqnRtOQqb"
@@ -106,8 +105,36 @@ def send_noti(room, metrics: list, chance):
         message_body=message_body,
         data_message=data_message
     )
-
     print("Alert sent")
+    return 1
 
-def feedback(temp, smoke):
+
+def live_percentage(room, sensor_data):
+    """Return: The fire possibility of the param room"""
+    return {
+        room: int(feed(metrics_dict_to_list(sensor_data)))
+    }
+
+
+def feedback(temp, smoke, status):
     return 0
+
+
+def mean_live_percentage(*sensor):
+    """Return: the mean of all fire possibilities of all sensors"""
+    sum = 0
+    for s in sensor:
+        sum += feed(metrics_dict_to_list(s))
+
+    return int(sum/len(sensor))
+
+def metrics_dict_to_list(s):
+    """Used to convert metrics from dictionary to list and subtract with offset.
+    Input: {
+        "smoke" : smoke,
+        "temperature": temp
+        }
+    Output: [smoke - offset, temp - offset]
+    Purpose: alter the input to pass as param of the feed() function
+    """
+    return [s["smoke"] - VAR.SMOKE_OFFSET, s["temperature"] - VAR.TEMP_OFFSET]

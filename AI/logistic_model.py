@@ -29,9 +29,9 @@ x_orig = np.append(fire, non_fire, 0)
 for row in x_orig:
     for col in range(len(row)):
         if col == 0:
-            row[col] = row[col] - VAR.TEMP_OFFSET
-        if col == 1:
             row[col] = row[col] - VAR.SMOKE_OFFSET
+        if col == 1:
+            row[col] = row[col] - VAR.TEMP_OFFSET
 
 y_orig = np.array([])
 
@@ -65,7 +65,7 @@ x = oneHot.transform(x_orig).toarray()
 oneHot.fit(y_orig)
 y = oneHot.transform(y_orig).toarray()
 
-alpha, epochs = 0.5, 100
+alpha, epochs = 0.5, 300
 m, n = x.shape
 print('m =', m)
 print('n =', n)

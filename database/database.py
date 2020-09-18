@@ -123,14 +123,14 @@ def handle_select_query(query, dto, *args):
 
 def return_message(message):
     if message is None:
-        return jsonify(
-            {"success": False,
-             "message": "Request unsuccessful"}
-        )
-    return jsonify(
-        {"success": True,
-         "message": message}
-    )
+        return jsonify({
+            "success": False,
+            "message": "Request unsuccessful"
+        })
+    return jsonify({
+        "success": True,
+        "message": message
+    })
 
 
 def handle_insert_query(query, *args):
@@ -318,8 +318,13 @@ def get_bar_chart(cur_month):
                 if month == k:
                     fire[k] += 1
 
-    translated_fire = month_int_to_str(fire)
-    return jsonify(translated_fire)
+    fire_dict = []
+    for v in fire.values():
+        fire_dict.append(v)
+
+    # translated_fire = month_int_to_str(fire)
+    # return jsonify(translated_fire)
+    return jsonify(fire_dict)
 
 
 def month_int_to_str(fire):
