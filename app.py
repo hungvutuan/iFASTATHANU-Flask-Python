@@ -402,11 +402,12 @@ class LiveInput(threading.Thread):
             time.sleep(self.delay)
 
 
-retrieve_input = LiveInput(20)
+retrieve_input = LiveInput(30)
 retrieve_input.start()
 
 
-# todo ignore
+# ignore
+
 @app.route("/notification/firebase", methods=['POST'])
 def notification():
     try:
@@ -416,7 +417,6 @@ def notification():
         raise InternalServerError
 
 
-# todo
 @app.route("/prediction/kitchen", methods=['GET'])
 def get_kitchen_percentage():
     try:
@@ -449,13 +449,18 @@ def get_mean_percentage():
         raise InternalServerError
 
 
-# todo
 @app.route("/notification/feedback", methods=['POST'])
 def get_user_feedback():
     try:
-        data = json.dumps(request.get_data().decode("utf-8"))
-
-        return engine.feedback(data["temperature"], data["smoke"], status)
+        data = request.get_json()
+        if data['status']:
+            res = engine.feedback(data)
+            if res:
+                return db.return_message("Dataset updated and the model changed")
+            else:
+                raise Exception
+        else:
+            return db.return_message("Dataset and model unchanged")
     except Exception:
         raise InternalServerError
 

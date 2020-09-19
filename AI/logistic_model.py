@@ -1,110 +1,109 @@
 # importing modules
 import os
 import sys
-from shutil import copyfile, move, SameFileError
+from shutil import copyfile, SameFileError
 
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
 from sklearn.preprocessing import OneHotEncoder
-from werkzeug.exceptions import InternalServerError
 
 from bin import global_var as VAR
 
-work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
-print(work_dir)
-time_iter = 0.0454
-val = []
 
-tf.compat.v1.disable_eager_execution()
+def train(isVisualize):
+    work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
+    time_iter = 0.0454
+    val = []
 
-# Set dataset
-fire = np.genfromtxt(work_dir + "/Dataset/fire.csv", delimiter=',', )
-non_fire = np.genfromtxt(work_dir + "/Dataset/non-fire.csv", delimiter=',', )
+    tf.compat.v1.disable_eager_execution()
 
-# Feature Matrix
-fire = np.delete(fire, 0, 1)
-non_fire = np.delete(non_fire, 0, 1)
-x_orig = np.append(fire, non_fire, 0)
-for row in x_orig:
-    for col in range(len(row)):
-        if col == 0:
-            row[col] = row[col] - VAR.SMOKE_OFFSET
-        if col == 1:
-            row[col] = row[col] - VAR.TEMP_OFFSET
+    # Set dataset
+    fire = np.genfromtxt(work_dir + "/Dataset/fire.csv", delimiter=',', )
+    non_fire = np.genfromtxt(work_dir + "/Dataset/non-fire.csv", delimiter=',', )
 
-y_orig = np.array([])
+    # Feature Matrix
+    fire = np.delete(fire, 0, 1)
+    non_fire = np.delete(non_fire, 0, 1)
+    x_orig = np.append(fire, non_fire, 0)
+    for row in x_orig:
+        for col in range(len(row)):
+            if col == 0:
+                row[col] = row[col] - VAR.SMOKE_OFFSET
+            if col == 1:
+                row[col] = row[col] - VAR.TEMP_OFFSET
 
-# Data labels
-for d1, sample1 in enumerate(fire):
-    y_orig = np.append(y_orig, [1], 0)
+    y_orig = np.array([])
 
-for d2, sample2 in enumerate(non_fire):
-    y_orig = np.append(y_orig, [0], 0)
+    # Data labels
+    for d1, sample1 in enumerate(fire):
+        y_orig = np.append(y_orig, [1], 0)
 
-y_orig = np.reshape(y_orig, (len(y_orig), -1))
+    for d2, sample2 in enumerate(non_fire):
+        y_orig = np.append(y_orig, [0], 0)
 
-print("Shape of Feature Matrix:", x_orig.shape)
-print("Shape Label Vector:", y_orig.shape)
+    y_orig = np.reshape(y_orig, (len(y_orig), -1))
 
-# Positive Data Points
-x_pos = np.array([x_orig[i] for i in range(len(x_orig)) if y_orig[i] == 1])
+    print("Shape of Feature Matrix:", x_orig.shape)
+    print("Shape Label Vector:", y_orig.shape)
 
-# Negative Data Points
-x_neg = np.array([x_orig[i] for i in range(len(x_orig))
-                  if y_orig[i] == 0])
+    # Positive Data Points
+    x_pos = np.array([x_orig[i] for i in range(len(x_orig)) if y_orig[i] == 1])
 
-# Creating the One Hot Encoder
-oneHot = OneHotEncoder()
+    # Negative Data Points
+    x_neg = np.array([x_orig[i] for i in range(len(x_orig))
+                      if y_orig[i] == 0])
 
-# Encoding x_orig
-oneHot.fit(x_orig)
-x = oneHot.transform(x_orig).toarray()
+    # Creating the One Hot Encoder
+    oneHot = OneHotEncoder()
 
-# Encoding y_orig
-oneHot.fit(y_orig)
-y = oneHot.transform(y_orig).toarray()
+    # Encoding x_orig
+    oneHot.fit(x_orig)
+    x = oneHot.transform(x_orig).toarray()
 
-alpha, epochs = 0.5, 300
-m, n = x.shape
-print('m =', m)
-print('n =', n)
-print('Learning Rate =', alpha)
-print('Number of Epochs =', epochs)
+    # Encoding y_orig
+    oneHot.fit(y_orig)
+    y = oneHot.transform(y_orig).toarray()
 
-# There are n columns in the feature matrix
-# after One Hot Encoding.
-X = tf.compat.v1.placeholder(tf.float32, [None, n])
+    alpha, epochs = 0.5, 300
+    m, n = x.shape
+    # if de
+    print('m =', m)
+    print('n =', n)
+    print('Learning Rate =', alpha)
+    print('Number of Epochs =', epochs)
 
-# Since this is a binary classification problem,
-# Y can take only 2 values.
-Y = tf.compat.v1.placeholder(tf.float32, [None, 2])
+    # There are n columns in the feature matrix
+    # after One Hot Encoding.
+    X = tf.compat.v1.placeholder(tf.float32, [None, n])
 
-# Trainable Variable Weights
-W = tf.Variable(tf.zeros([n, 2]))
+    # Since this is a binary classification problem,
+    # Y can take only 2 values.
+    Y = tf.compat.v1.placeholder(tf.float32, [None, 2])
 
-# Trainable Variable Bias
-b = tf.Variable(tf.zeros([2]))
+    # Trainable Variable Weights
+    W = tf.Variable(tf.zeros([n, 2]))
 
-# Hypothesis
-Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(X, W), b))
+    # Trainable Variable Bias
+    b = tf.Variable(tf.zeros([2]))
 
-# Sigmoid Cross Entropy Cost Function
-cost = tf.nn.sigmoid_cross_entropy_with_logits(
-    logits=Y_hat, labels=Y)
+    # Hypothesis
+    Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(X, W), b))
 
-# Gradient Descent Optimizer
-optimizer = tf.compat.v1.train.GradientDescentOptimizer(
-    learning_rate=alpha).minimize(cost)
+    # Sigmoid Cross Entropy Cost Function
+    cost = tf.nn.sigmoid_cross_entropy_with_logits(
+        logits=Y_hat, labels=Y)
 
-# Global Variables Initializer
-init = tf.compat.v1.global_variables_initializer()
+    # Gradient Descent Optimizer
+    optimizer = tf.compat.v1.train.GradientDescentOptimizer(
+        learning_rate=alpha).minimize(cost)
 
+    # Global Variables Initializer
+    init = tf.compat.v1.global_variables_initializer()
 
-def train():
     # Starting the Tensorflow Session
     with tf.compat.v1.Session() as sess:
-        # Initializing the Variables
+        # init the variables
         sess.run(init)
 
         # Lists for storing the changing Cost and Accuracy in every Epoch
@@ -141,7 +140,8 @@ def train():
         print("\nAccuracy:", accuracy_history[-1], "%")
 
     # visualize data
-    # visualize(cost_history, accuracy_history, Weight, Bias)
+    if isVisualize:
+        visualize(cost_history, accuracy_history, Weight, Bias, epochs, x_orig, y_orig)
 
     # save trained data to a file
     f = open(VAR.TRAINED_DATA_FILE, "w")
@@ -156,19 +156,23 @@ def train():
 
     f.close()
 
-    # copy the above file to the mother (top-most) directory
+    # un-comment to copy the file to the mother (top-most) directory
     src = work_dir + "/" + VAR.TRAINED_DATA_FILE
     dst = VAR.GLOBAL_DIR + "/" + VAR.TRAINED_DATA_FILE
-    try:
-        copyfile(src, dst)
-    except (SameFileError, IOError):
-        print("Cannot copy the", VAR.TRAINED_DATA_FILE, "file")
-        return VAR.ERROR
+    # copy_file(src, dst) # un-comment to copy the file
 
     return [Weight, Bias]
 
 
-def visualize(cost_history, accuracy_history, Weight, Bias):
+def copy_file(src, dst):
+    try:
+        copyfile(src, dst)
+    except (SameFileError, IOError):
+        print("Cannot copy the", VAR.TRAINED_DATA_FILE, "file")
+        return VAR.ERROR_CODE
+
+
+def visualize(cost_history, accuracy_history, Weight, Bias, epochs, x_orig, y_orig):
     plt.plot(list(range(epochs)), cost_history)
     plt.xlabel('Epochs')
     plt.ylabel('Cost')
@@ -216,6 +220,3 @@ def visualize(cost_history, accuracy_history, Weight, Bias):
 
     plt.show()
     plt.clf()
-
-train()
-sys.exit(0)
