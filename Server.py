@@ -6,22 +6,22 @@ import time
 
 import paho.mqtt.publish as publish
 
+time.sleep(2)
 while True:
-    MQTT_MSG = json.dumps({
+    MQTT_MSG_kitchen = json.dumps({
         "temperature": random.randint(45, 50),
         "smoke": random.randint(90, 120)
     })
-    MQTT_MSG1 = json.dumps({
-        "temperature": random.randint(45, 50),
-        "smoke": random.randint(90, 120)
+    MQTT_MSG_bedroom = json.dumps({
+        "temperature": random.randint(35, 36),
+        "smoke": random.randint(50, 80)
     })
-    MQTT_MSG2 = json.dumps({
-        "temperature": random.randint(45, 50),
+    MQTT_MSG_livingroom = json.dumps({
+        "temperature": random.randint(33, 35),
         "smoke": random.randint(90, 120)
     })
 
-    publish.single("CoreElectronics/kitchen", MQTT_MSG, hostname="broker.hivemq.com")
-    publish.single("CoreElectronics/bedroom", MQTT_MSG1, hostname="broker.hivemq.com")
-    publish.single("CoreElectronics/living", MQTT_MSG2, hostname="broker.hivemq.com")
+    publish.single("CoreElectronics/kitchen", MQTT_MSG_kitchen, hostname="broker.hivemq.com")
+    publish.single("CoreElectronics/bedroom", MQTT_MSG_bedroom, hostname="broker.hivemq.com")
+    publish.single("CoreElectronics/living", MQTT_MSG_livingroom, hostname="broker.hivemq.com")
     time.sleep(1)
-    # print("Done")
