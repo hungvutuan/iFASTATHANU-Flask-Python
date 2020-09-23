@@ -1,15 +1,12 @@
 import os
-import sys
 import threading
 from shutil import copyfile, SameFileError
 
-import matplotlib.pyplot as plt
+import numpy as np
 from pyfcm import FCMNotification
 
-import numpy as np
-from bin import global_var as VAR
 from AI import logistic_model as model
-import time
+from bin import global_var as VAR
 
 renew = False
 
@@ -29,6 +26,9 @@ holder = 0
 
 
 def sigmoid(z):
+    """Produces the sigmoid value of z on the 2D plot
+    Input: a float
+    Output: the sigmoid value of the input"""
     return 1 / (1 + np.exp(-z))
 
 
@@ -42,6 +42,9 @@ def __calc(val):
 
 
 def feed(val):
+    """Retrieve the output for the algorithm. This function produces directly the percentage of fire
+    Input: a list of temp and smoke in that order
+    Output: the probability of a fire"""
     total = sigmoid(val[0] * weight[-1][0] + bias[0]) + \
             sigmoid(val[1] * weight[-1][1] + bias[1]) * 100
     res = (total - 75) * 4
@@ -81,21 +84,25 @@ def check_input(val: dict):
         metrics = metrics_dict_to_list(info)
         chance = feed(metrics)
         print(room + ":", metrics, "chance:", chance)
+
+        # todo add reading to dataset
         if chance > VAR.FIRE_BAR:
             send_noti(room, metrics, chance)
             # todo insert to database history a fire
 
-            # todo add reading to dataset
             f = open(work_dir + VAR.FIRE_DATASET, 'a')
-            f.write('0, ' + str(metrics[0] + ', ' + str(metrics[1])))
+            f.write('0, ' + str(metrics[0]) + ', ' + str(metrics[1]) + "\n")
         elif chance < VAR.IMMINENT_BAR:
             nf = open(work_dir + VAR.NON_FIRE_DATASET, 'a')
-            nf.write('0, ' + str(metrics[0] + ', ' + str(metrics[1])))
+            nf.write('0, ' + str(metrics[0]) + ', ' + str(metrics[1]) + "\n")
 
 
 def send_noti(room, metrics: list, chance):
     """Declare a FCMNotification instance, which is then packed
      with a body to send to the Firebase broker"""
+    # fix room display grammar
+    if room == "living":
+        room += "room"
     push_service = FCMNotification(
         api_key="AAAAh8zZKmc:APA91bHCM7OfYaJZUAPA"
                 "-GVGTPpQMYpbi1RBIWCf4CtBAwpTArWQ_Na0Kla2PX7frNWBqnRtOQqb"
@@ -103,9 +110,7 @@ def send_noti(room, metrics: list, chance):
 
     # attributes for the notification
     message_title = "Fire Hazard"
-    message_body = "from your " + room + " was detected"
-    if room == "living":
-        message_body = "from your " + room + "room was detected"
+    message_body = "detected in your " + room
     data_message = {
         "chance": chance,
         "temperature": metrics[0],
@@ -180,6 +185,12 @@ def feedback(data):
     temp = data['temperature']
     smoke = data['smoke']
 
+    if isinstance(temp, str):
+        temp = int(temp)
+
+    if isinstance(smoke, str):
+        smoke = int(smoke)
+
     res = change_dataset(temp, smoke)
     if res:
         return True
@@ -241,17 +252,17 @@ def change_dataset(temp, smoke):
     copy_file(work_dir + VAR.NON_FIRE_DATASET, work_dir + VAR.NON_FIRE_DATASET + "_backup.txt")
 
     # rewrite the contents of the fire and non-fire dataset
-    f = open(work_dir + VAR.FIRE_DATASET, "w")
-    nf = open(work_dir + VAR.NON_FIRE_DATASET, "w")
+    # f = open(work_dir + VAR.FIRE_DATASET, "w")
+    # nf = open(work_dir + VAR.NON_FIRE_DATASET, "w")
 
-    for f_row in fire:
-        f.write(f_row + "\n")
+    # for f_row in fire:
+    #     f.write(f_row + "\n")
+    #
+    # for nf_row in non_fire:
+    #     nf.write(nf_row + "\n")
 
-    for nf_row in non_fire:
-        nf.write(nf_row + "\n")
-
-    f.close()
-    nf.close()
+    # f.close()
+    # nf.close()
 
     # rerun the training model
     global renew
@@ -276,9 +287,10 @@ class CheckFeedback(threading.Thread):
                 try:
                     model.train(isVisualize=False)
                     print(VAR.MESS_SUCCESS, "Re-training succeeded")
-                    renew = False
                 except Exception:
                     print(VAR.MESS_ERROR, "Re-training failed")
+
+                renew = False
 
 
 check_feedback = CheckFeedback()
