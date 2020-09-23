@@ -60,19 +60,7 @@ neutral_val = [22, -2]
 not_fire_val = [-30, -6]
 prediction = np.reshape(prediction, (len(prediction), -1))
 
-
-# for i in range(x.shape[0]):
-#     for k in range(x.shape[1]):
-#         x[i][k] = sigmoid(x_orig[i][k] * weight[i][k] + bias[k])
-#
-#     prediction[i] = sigmoid(x[i][0] + x[i][1])
-
-
-# plt.plot(x_orig[:prediction.shape[0]], sigmoid(x_orig[:prediction.shape[0]]))
-# plt.plot(x_orig[:prediction.shape[0]], x)
-# plt.title("Sigmoid for accuracy")
-# plt.show()
-
+# Only for debugging
 # print("Fire:", feed(fire_val))
 # print("Fire1:", feed([10, 8]))
 # print("Neutral:", feed(neutral_val))
@@ -80,21 +68,22 @@ prediction = np.reshape(prediction, (len(prediction), -1))
 
 
 def check_input(val: dict):
+    f_file = open(work_dir + VAR.FIRE_DATASET, 'a')
+    nf_file = open(work_dir + VAR.NON_FIRE_DATASET, 'a')
     for room, info in val.items():
         metrics = metrics_dict_to_list(info)
         chance = feed(metrics)
         print(room + ":", metrics, "chance:", chance)
+        metrics_write = '0, ' + str(metrics[0] + VAR.SMOKE_OFFSET) + ', ' + str(metrics[1] + VAR.TEMP_OFFSET) + "\n"
 
-        # todo add reading to dataset
+        # add reading to dataset
         if chance > VAR.FIRE_BAR:
             send_noti(room, metrics, chance)
             # todo insert to database history a fire
 
-            f = open(work_dir + VAR.FIRE_DATASET, 'a')
-            f.write('0, ' + str(metrics[0]) + ', ' + str(metrics[1]) + "\n")
-        elif chance < VAR.IMMINENT_BAR:
-            nf = open(work_dir + VAR.NON_FIRE_DATASET, 'a')
-            nf.write('0, ' + str(metrics[0]) + ', ' + str(metrics[1]) + "\n")
+            f_file.write(metrics_write)
+        elif VAR.SAFE_BAR <= chance < VAR.IMMINENT_BAR:
+            nf_file.write(metrics_write)
 
 
 def send_noti(room, metrics: list, chance):

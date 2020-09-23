@@ -13,7 +13,6 @@ from bin import global_var as VAR
 
 def train(isVisualize):
     work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
-    time_iter = 0.0454
     val = []
 
     tf.compat.v1.disable_eager_execution()
@@ -54,6 +53,10 @@ def train(isVisualize):
     x_neg = np.array([x_orig[i] for i in range(len(x_orig))
                       if y_orig[i] == 0])
 
+    # visualize the dataset on a 2D plot
+    if isVisualize:
+        visualize_dataset(x_orig, y_orig, original=True)
+
     # Creating the One Hot Encoder
     oneHot = OneHotEncoder()
 
@@ -65,7 +68,7 @@ def train(isVisualize):
     oneHot.fit(y_orig)
     y = oneHot.transform(y_orig).toarray()
 
-    alpha, epochs = 0.5, 300
+    alpha, epochs = 0.3, 1001
     m, n = x.shape
     # if de
     print('m =', m)
@@ -141,7 +144,7 @@ def train(isVisualize):
 
     # visualize data
     if isVisualize:
-        visualize(cost_history, accuracy_history, Weight, Bias, epochs, x_orig, y_orig)
+        visualize_output(cost_history, accuracy_history, Weight, Bias, epochs, x_orig, y_orig)
 
     # save trained data to a file
     f = open(VAR.TRAINED_DATA_FILE, "w")
@@ -172,7 +175,40 @@ def copy_file(src, dst):
         return VAR.ERROR_CODE
 
 
-def visualize(cost_history, accuracy_history, Weight, Bias, epochs, x_orig, y_orig):
+def visualize_dataset(x_orig, y_orig, original: bool = True):
+    if original:
+        # change back the dataset
+        for row in x_orig:
+            for col in range(len(row)):
+                if col == 0:
+                    row[col] = row[col] + VAR.SMOKE_OFFSET
+                if col == 1:
+                    row[col] = row[col] + VAR.TEMP_OFFSET
+
+    # Positive Data Points
+    x_pos = np.array([x_orig[i] for i in range(len(x_orig))
+                      if y_orig[i] == 1])
+
+    # Negative Data Points
+    x_neg = np.array([x_orig[i] for i in range(len(x_orig))
+                      if y_orig[i] == 0])
+
+    # Plotting the Positive Data Points
+    plt.scatter(x_pos[:, 0], x_pos[:, 1], color='blue', label='Fire')
+
+    # Plotting the Negative Data Points
+    plt.scatter(x_neg[:, 0], x_neg[:, 1], color='red', label='Safe')
+
+    plt.xlabel('Smoke (ppm)')
+    plt.ylabel('Temperature (°C)')
+    plt.title('Plot of the dataset')
+    plt.legend()
+
+    plt.show()
+
+
+def visualize_output(cost_history, accuracy_history, Weight, Bias, epochs, x_orig, y_orig):
+    # visualize cost function
     plt.plot(list(range(epochs)), cost_history)
     plt.xlabel('Epochs')
     plt.ylabel('Cost')
@@ -220,3 +256,6 @@ def visualize(cost_history, accuracy_history, Weight, Bias, epochs, x_orig, y_or
 
     plt.show()
     plt.clf()
+
+
+train(True)

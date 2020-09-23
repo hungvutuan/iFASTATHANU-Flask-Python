@@ -119,8 +119,8 @@ def get_all_metrics():
 @app.route('/live/kitchen', methods=['GET'])
 def get_live_kitchen_metrics():
     try:
-        current_time = get_current_time()
-        sensor_data_kitchen["current_time"] = current_time
+        # current_time = get_current_time()
+        # sensor_data_kitchen["current_time"] = current_time
         return jsonify(sensor_data_kitchen)
     except Exception:
         raise InternalServerError
@@ -129,8 +129,8 @@ def get_live_kitchen_metrics():
 @app.route('/live/bedroom', methods=['GET'])
 def get_live_bedroom_metrics():
     try:
-        current_time = get_current_time()
-        sensor_data_kitchen["current_time"] = current_time
+        # current_time = get_current_time()
+        # sensor_data_kitchen["current_time"] = current_time
         return jsonify(sensor_data_bedroom)
     except Exception:
         raise InternalServerError
@@ -139,8 +139,8 @@ def get_live_bedroom_metrics():
 @app.route('/live/livingroom', methods=['GET'])
 def get_live_livingroom_metrics():
     try:
-        current_time = get_current_time()
-        sensor_data_kitchen["current_time"] = current_time
+        # current_time = get_current_time()
+        # sensor_data_kitchen["current_time"] = current_time
         return jsonify(sensor_data_living)
     except Exception:
         raise InternalServerError
@@ -402,16 +402,14 @@ class LiveInput(threading.Thread):
             time.sleep(self.delay)
 
 
-retrieve_input = LiveInput(30)
+retrieve_input = LiveInput(VAR.DELAY_LIVE_INPUT)
 retrieve_input.start()
 
 
-# ignore
-
+# out of scope
 @app.route("/notification/firebase", methods=['POST'])
 def notification():
     try:
-
         return db.return_message("Noti sent")
     except Exception:
         raise InternalServerError
@@ -472,5 +470,16 @@ def add_header(resp):
     return resp
 
 
+@app.route('/shutdown', methods=['POST'])
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    return 'Server shutting down...'
+
+
 if __name__ == '__ main__':
     app.run(host='0.0.0.0', port=5000, threaded=True, debug=False)
+
+
