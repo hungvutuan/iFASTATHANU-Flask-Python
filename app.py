@@ -453,7 +453,7 @@ def get_mean_percentage():
 def get_user_feedback():
     try:
         data = request.get_json()
-        if data['status']:
+        if not data['status']:
             res = engine.feedback(data)
             if res:
                 return db.return_message("Dataset updated and the model changed")

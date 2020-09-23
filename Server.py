@@ -6,7 +6,6 @@ import time
 
 import paho.mqtt.publish as publish
 
-time.sleep(2)
 while True:
     MQTT_MSG_kitchen = json.dumps({
         "temperature": random.randint(45, 50),
