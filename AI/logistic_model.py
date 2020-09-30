@@ -258,4 +258,4 @@ def visualize_output(cost_history, accuracy_history, Weight, Bias, epochs, x_ori
     plt.clf()
 
 
-train(True)
+# train(True)

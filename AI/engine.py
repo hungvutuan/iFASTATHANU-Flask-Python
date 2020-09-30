@@ -1,9 +1,11 @@
 import os
 import threading
+from datetime import date
 from shutil import copyfile, SameFileError
 
 import numpy as np
 from pyfcm import FCMNotification
+from database import database as db
 
 from AI import logistic_model as model
 from bin import global_var as VAR
@@ -60,6 +62,7 @@ neutral_val = [22, -2]
 not_fire_val = [-30, -6]
 prediction = np.reshape(prediction, (len(prediction), -1))
 
+
 # Only for debugging
 # print("Fire:", feed(fire_val))
 # print("Fire1:", feed([10, 8]))
@@ -73,14 +76,17 @@ def check_input(val: dict):
     for room, info in val.items():
         metrics = metrics_dict_to_list(info)
         chance = feed(metrics)
-        print(room + ":", metrics, "chance:", chance)
+        original_metrics = [metrics[0] + VAR.SMOKE_OFFSET, metrics[1] + VAR.TEMP_OFFSET]
+        print(room + ":", original_metrics, "chance:", chance)
         metrics_write = '0, ' + str(metrics[0] + VAR.SMOKE_OFFSET) + ', ' + str(metrics[1] + VAR.TEMP_OFFSET) + "\n"
 
         # add reading to dataset
         if chance > VAR.FIRE_BAR:
             send_noti(room, metrics, chance)
-            # todo insert to database history a fire
-
+            # insert to database history a fire
+            db.insert_history_sensor_backend(1, metrics[1], metrics[0], 0,
+                                             date.today().strftime("%Y-%m-%d"),
+                                             1, 1, 1, 1)
             f_file.write(metrics_write)
         elif VAR.SAFE_BAR <= chance < VAR.IMMINENT_BAR:
             nf_file.write(metrics_write)

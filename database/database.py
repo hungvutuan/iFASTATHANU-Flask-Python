@@ -31,8 +31,8 @@ query_insert_smoke_sensor = "insert into smoke_sensor(smoke_name, loc_id)values{
 query_insert_sensor_loc = "insert into sensor_loc(loc_name) values{};"
 query_insert_temp_sensor = "insert into temp_sensor(temp_name, loc_id) values{};"
 query_insert_gas_sensor = "insert into gas_sensor(gas_name, loc_id) values{};"
-query_insert_history_sensor = "insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, " \
-                              "date_reading, temp_id, smoke_id, gas_id) values{}; "
+query_insert_history_sensor = "insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading," \
+                              " date_reading, temp_id, smoke_id, gas_id, alarm_id) values{}; "
 
 # delete
 query_delete_device_by_id = "DELETE FROM device WHERE device_id = {} LIMIT 1;"
@@ -212,10 +212,18 @@ def insert_gas_sensor(gas_name, loc_id):
     return return_message("A gas sensor was added")
 
 
-def insert_history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id):
+def insert_history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id,
+                          alarm_id):
     handle_insert_query(query_insert_history_sensor, device_id, temp_reading, smoke_reading, gas_reading, date_reading,
-                        temp_id, smoke_id, gas_id)
+                        temp_id, smoke_id, gas_id, alarm_id)
     return return_message("A sensor's history was added")
+
+
+def insert_history_sensor_backend(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id,
+                          alarm_id):
+    handle_insert_query(query_insert_history_sensor, device_id, temp_reading, smoke_reading, gas_reading, date_reading,
+                        temp_id, smoke_id, gas_id, alarm_id)
+    return True
 
 
 # GET queries
