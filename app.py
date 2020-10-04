@@ -296,8 +296,12 @@ def insert_history_sensor():
         temp_id = request.args.get("temp_id")
         smoke_id = request.args.get("smoke_id")
         gas_id = request.args.get("gas_id")
+        if request.args.get("alarm_id") is not None:
+            alarm_id = request.args.get("alarm_id")
+        else:
+            alarm_id = 1  # alarm 1 means auto
         return db.insert_history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id,
-                                        smoke_id, gas_id)
+                                        smoke_id, gas_id, alarm_id)
     except DatabaseError as e:
         app.logger.exception(e)
         raise InternalServerError
@@ -481,5 +485,3 @@ def shutdown_server():
 
 if __name__ == '__ main__':
     app.run(host='0.0.0.0', port=5000, threaded=True, debug=False)
-
-

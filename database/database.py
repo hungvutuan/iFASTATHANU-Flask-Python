@@ -1,5 +1,4 @@
 import mysql.connector
-import json
 import datetime
 from flask import jsonify
 import DTO
@@ -51,7 +50,8 @@ def get_fail_db_message():
 
 
 def init_db(host, user, pw, _db):
-    """MySQL database initialization"""
+    """MySQL database initialization
+    :return connection to the DB"""
     try:
         return mysql.connector.connect(
             host=host,
@@ -84,7 +84,8 @@ def default(o):
 def handle_select_query(query, dto, *args):
     """Perform the QUERY and return an DTO json object
     If an argument is passed, it assumes that it is ID
-    to fill in the query"""
+    to fill in the query
+    :return DTO type"""
     if dto is not None:
         cursor = db.cursor()
 
@@ -219,8 +220,8 @@ def insert_history_sensor(device_id, temp_reading, smoke_reading, gas_reading, d
     return return_message("A sensor's history was added")
 
 
-def insert_history_sensor_backend(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id,
-                          alarm_id):
+def insert_history_sensor_backend(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id,
+                                  gas_id, alarm_id):
     handle_insert_query(query_insert_history_sensor, device_id, temp_reading, smoke_reading, gas_reading, date_reading,
                         temp_id, smoke_id, gas_id, alarm_id)
     return True
@@ -300,6 +301,8 @@ def get_pie_chart():
 
 
 def get_last_6_months(cur_month):
+    """:param cur_month current month
+    :return list of the 6 months ago until current month"""
     months = [i + 1 for i in range(12)]
 
     if cur_month >= 6:

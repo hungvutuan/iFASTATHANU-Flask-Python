@@ -57,20 +57,16 @@ def train(isVisualize):
     if isVisualize:
         visualize_dataset(x_orig, y_orig, original=True)
 
-    # Creating the One Hot Encoder
+    # encode with onehot
     oneHot = OneHotEncoder()
-
-    # Encoding x_orig
     oneHot.fit(x_orig)
     x = oneHot.transform(x_orig).toarray()
-
-    # Encoding y_orig
     oneHot.fit(y_orig)
     y = oneHot.transform(y_orig).toarray()
 
-    alpha, epochs = 0.3, 1001
+    alpha, epochs = 0.3, 500
     m, n = x.shape
-    # if de
+    # display dimensions of the dataset
     print('m =', m)
     print('n =', n)
     print('Learning Rate =', alpha)
@@ -80,64 +76,57 @@ def train(isVisualize):
     # after One Hot Encoding.
     X = tf.compat.v1.placeholder(tf.float32, [None, n])
 
-    # Since this is a binary classification problem,
-    # Y can take only 2 values.
+    # since this is a binary classification problem, Y can take only 2 values.
     Y = tf.compat.v1.placeholder(tf.float32, [None, 2])
 
-    # Trainable Variable Weights
+    # trainable Variable Weights
     W = tf.Variable(tf.zeros([n, 2]))
 
-    # Trainable Variable Bias
+    # trainable Variable Bias
     b = tf.Variable(tf.zeros([2]))
 
-    # Hypothesis
+    # the primary hypothesis
     Y_hat = tf.nn.sigmoid(tf.add(tf.matmul(X, W), b))
 
     # Sigmoid Cross Entropy Cost Function
     cost = tf.nn.sigmoid_cross_entropy_with_logits(
         logits=Y_hat, labels=Y)
 
-    # Gradient Descent Optimizer
+    # optimize gradient descent
     optimizer = tf.compat.v1.train.GradientDescentOptimizer(
         learning_rate=alpha).minimize(cost)
 
-    # Global Variables Initializer
     init = tf.compat.v1.global_variables_initializer()
 
-    # Starting the Tensorflow Session
+    # start the Tensorflow Session
     with tf.compat.v1.Session() as sess:
         # init the variables
         sess.run(init)
-
-        # Lists for storing the changing Cost and Accuracy in every Epoch
         cost_history, accuracy_history = [], []
 
-        # Iterating through all the epochs
         for epoch in range(epochs):
-            cost_per_epoch = 0
-            # Running the Optimizer
             sess.run(optimizer, feed_dict={X: x, Y: y})
 
-            # Calculating cost on current Epoch
+            # calculate cost
             c = sess.run(cost, feed_dict={X: x, Y: y})
 
-            # Calculating accuracy on current Epoch
+            # generate accuracy of the current training epoch
             correct_prediction = tf.equal(tf.argmax(Y_hat, 1), tf.argmax(Y, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
-            # Storing Cost and Accuracy to the history
+            # save values to history
             cost_history.append(sum(sum(c)))
             accuracy_history.append(accuracy.eval({X: x, Y: y}) * 100)
 
-            # Displaying result on current Epoch
+            # result on current Epoch
             if epoch % 100 == 0 and epoch != 0:
                 print("Epoch " + str(epoch) + " Cost: "
                       + str(cost_history[-1]))
 
-        Weight = sess.run(W)  # Optimized Weight
-        Bias = sess.run(b)  # Optimized Bias
+        Weight = sess.run(W)  # optimized weight
+        Bias = sess.run(b)  # optimized bias
 
-        # Final Accuracy
+        # accuracy
         correct_prediction = tf.equal(tf.argmax(Y_hat, 1), tf.argmax(Y, 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         print("\nAccuracy:", accuracy_history[-1], "%")
@@ -153,15 +142,15 @@ def train(isVisualize):
             f.write(str(row[col]) + " ")
         f.write("\n")
 
-    f.write("|") # separator
+    f.write("|")    # separator
     for col in Bias:
         f.write(str(col) + " ")
 
     f.close()
 
-    # un-comment to copy the file to the mother (top-most) directory
     src = work_dir + "/" + VAR.TRAINED_DATA_FILE
     dst = VAR.GLOBAL_DIR + "/" + VAR.TRAINED_DATA_FILE
+    # un-comment to copy the file to the mother (top-most) directory
     # copy_file(src, dst) # un-comment to copy the file
 
     return [Weight, Bias]
@@ -221,7 +210,7 @@ def visualize_output(cost_history, accuracy_history, Weight, Bias, epochs, x_ori
     plt.title('Increase in Accuracy with Epochs')
     plt.show()
 
-    # Calculating the Decision Boundary
+    # Decision Boundary
     decision_boundary_x = np.array([np.min(x_orig[:, 0]),
                                     np.max(x_orig[:, 0])])
 

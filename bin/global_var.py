@@ -1,7 +1,7 @@
 import os
 
 CURRENT_VER = "0.1.0"
-ERR_PYTHON_VER_3 = 'Please use Python 3 to run this application'
+ERR_PYTHON_VER_3 = 'Python 3 required to run this application'
 FIRE_DATASET = "/Dataset/fire.csv"
 NON_FIRE_DATASET = "/Dataset/non-fire.csv"
 TRAINED_DATA_FILE = "val.txt"

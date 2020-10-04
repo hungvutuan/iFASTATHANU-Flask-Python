@@ -11,6 +11,8 @@ from AI import logistic_model as model
 from bin import global_var as VAR
 
 renew = False
+kitchen_log = bedroom_log = living_log = [0] * 5
+sensor_kitchen = sensor_bedroom = sensor_living = [-1, -1]
 
 # open the trained file
 work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
@@ -18,8 +20,8 @@ f = open(work_dir + "/" + VAR.TRAINED_DATA_FILE, "r")
 f = f.read().split("|")
 
 # retrieve data from the "trained data file"
-weight = np.fromstring(f[0], dtype=float, sep=" ")  # convert weight (string) to a vector
-weight = np.reshape(weight, (-1, 2))  # convert vector to a 2D array
+_weight = np.fromstring(f[0], dtype=float, sep=" ")  # convert weight (string) to a vector
+weight = np.reshape(_weight, (-1, 2))  # convert vector to a 2D array
 bias = np.fromstring(f[1], dtype=float, sep=" ")  # convert bias (string) to a vector
 
 x = np.array(np.zeros(weight.shape))
@@ -30,7 +32,7 @@ holder = 0
 def sigmoid(z):
     """Produces the sigmoid value of z on the 2D plot
     Input: a float
-    Output: the sigmoid value of the input"""
+    :return the sigmoid value of the input"""
     return 1 / (1 + np.exp(-z))
 
 
@@ -47,8 +49,7 @@ def feed(val):
     """Retrieve the output for the algorithm. This function produces directly the percentage of fire
     Input: a list of temp and smoke in that order
     Output: the probability of a fire"""
-    total = sigmoid(val[0] * weight[-1][0] + bias[0]) + \
-            sigmoid(val[1] * weight[-1][1] + bias[1]) * 100
+    total = sigmoid(val[0] * weight[-1][0] + bias[0]) + sigmoid(val[1] * weight[-1][1] + bias[1]) * 100
     res = (total - 75) * 4
     if res < 0:
         return 0
@@ -71,6 +72,7 @@ prediction = np.reshape(prediction, (len(prediction), -1))
 
 
 def check_input(val: dict):
+    global kitchen_log, living_log, bedroom_log, sensor_bedroom, sensor_kitchen, sensor_living
     f_file = open(work_dir + VAR.FIRE_DATASET, 'a')
     nf_file = open(work_dir + VAR.NON_FIRE_DATASET, 'a')
     for room, info in val.items():
@@ -79,6 +81,19 @@ def check_input(val: dict):
         original_metrics = [metrics[0] + VAR.SMOKE_OFFSET, metrics[1] + VAR.TEMP_OFFSET]
         print(room + ":", original_metrics, "chance:", chance)
         metrics_write = '0, ' + str(metrics[0] + VAR.SMOKE_OFFSET) + ', ' + str(metrics[1] + VAR.TEMP_OFFSET) + "\n"
+
+        # store chances in logs to iterate in the future prediction module
+        if room == "kitchen":
+            sensor_kitchen = metrics
+            kitchen_log = update_log(kitchen_log, chance)
+        elif room == "living":
+            sensor_living = metrics
+            living_log = update_log(living_log, chance)
+        elif room == "bedroom":
+            sensor_bedroom = metrics
+            bedroom_log = update_log(bedroom_log, chance)
+        else:
+            print(VAR.MESS_WARNING, "The future prediction module is not running")
 
         # add reading to dataset
         if chance > VAR.FIRE_BAR:
@@ -90,6 +105,41 @@ def check_input(val: dict):
             f_file.write(metrics_write)
         elif VAR.SAFE_BAR <= chance < VAR.IMMINENT_BAR:
             nf_file.write(metrics_write)
+
+
+class Predictor(threading.Thread):
+    """Predict the fire chance in the future and alert users accordingly"""
+
+    def __init__(self, logs, room, metrics):
+        super().__init__()
+        self.metrics = metrics
+        self.room = room
+        self.logs = logs
+
+    def __run__(self):
+        while True:
+            for pos in range(len(self.logs) - 1):
+                # if the two consecutive readings differs 20% then its fire, or if two consecutive readings excluding
+                # one in the middle exceeds 30% in difference then its also fire.
+                # alert user via mobile phone if fire spotted
+                if (self.logs[pos + 1] - self.logs[pos] >= 20) or \
+                        (pos != len(self.logs) - 2 and self.logs[pos + 2] - self.logs[pos] >= 30):
+                    send_noti(self.room, self.metrics, self.logs[pos])
+
+
+predictor_living = Predictor(living_log, "Living room", sensor_living)
+predictor_bedroom = Predictor(bedroom_log, "Bedroom", sensor_bedroom)
+predictor_kitchen = Predictor(kitchen_log, "Kitchen", sensor_kitchen)
+
+predictor_living.start()
+predictor_bedroom.start()
+predictor_kitchen.start()
+
+
+def update_log(log, val):
+    log.append(val)
+    log.pop(0)
+    return log
 
 
 def send_noti(room, metrics: list, chance):
@@ -199,8 +249,9 @@ def change_dataset(temp, smoke):
         - the smoke reading
     within the proximity of the attempted alarm. The "proximity" implied here is not a fixed value.
 
-    Input: temperature and smoke from the attempted alert
-    Output: True if the contents of the dataset are changed
+    :param smoke: from the attempted alert
+    :param temp: from the attempted alert
+    :return True if the contents of the dataset are changed
     """
     under_bound_temp = temp - 1
     upper_bound_temp = temp + 1
@@ -247,17 +298,16 @@ def change_dataset(temp, smoke):
     copy_file(work_dir + VAR.NON_FIRE_DATASET, work_dir + VAR.NON_FIRE_DATASET + "_backup.txt")
 
     # rewrite the contents of the fire and non-fire dataset
-    # f = open(work_dir + VAR.FIRE_DATASET, "w")
-    # nf = open(work_dir + VAR.NON_FIRE_DATASET, "w")
+    f = open(work_dir + VAR.FIRE_DATASET, "w")
+    nf = open(work_dir + VAR.NON_FIRE_DATASET, "w")
 
-    # for f_row in fire:
-    #     f.write(f_row + "\n")
-    #
-    # for nf_row in non_fire:
-    #     nf.write(nf_row + "\n")
+    for f_row in fire:
+        f.write(f_row + "\n")
+    for nf_row in non_fire:
+        nf.write(nf_row + "\n")
 
-    # f.close()
-    # nf.close()
+    f.close()
+    nf.close()
 
     # rerun the training model
     global renew
@@ -269,8 +319,8 @@ def change_dataset(temp, smoke):
 class CheckFeedback(threading.Thread):
     """Repeatedly check for renewing the logit model request
     Triggered only when user sends a feedback of FALSE ATTEMPT TO ALARM
-    Input: None
-    Output: None"""
+    :param: None
+    :return: None"""
 
     def __init__(self):
         super().__init__()
