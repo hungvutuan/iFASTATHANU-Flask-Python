@@ -1,6 +1,7 @@
 # importing modules
 import os
 import sys
+from datetime import datetime, date
 from shutil import copyfile, SameFileError
 
 import matplotlib.pyplot as plt
@@ -11,7 +12,8 @@ from sklearn.preprocessing import OneHotEncoder
 from bin import global_var as VAR
 
 
-def train(isVisualize):
+def train(isVisualize, epoch=300, learning_rate=0.3):
+    start_time = datetime.now().strftime("%H:%M:%S")
     work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
     val = []
 
@@ -57,14 +59,14 @@ def train(isVisualize):
     if isVisualize:
         visualize_dataset(x_orig, y_orig, original=True)
 
-    # encode with onehot
+    # encode with OneHotEncoder
     oneHot = OneHotEncoder()
     oneHot.fit(x_orig)
     x = oneHot.transform(x_orig).toarray()
     oneHot.fit(y_orig)
     y = oneHot.transform(y_orig).toarray()
 
-    alpha, epochs = 0.3, 500
+    alpha, epochs = learning_rate, epoch
     m, n = x.shape
     # display dimensions of the dataset
     print('m =', m)
@@ -153,6 +155,8 @@ def train(isVisualize):
     # un-comment to copy the file to the mother (top-most) directory
     # copy_file(src, dst) # un-comment to copy the file
 
+    end_time = datetime.now().strftime("%H:%M:%S")
+    print(datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time))
     return [Weight, Bias]
 
 

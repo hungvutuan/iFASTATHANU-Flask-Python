@@ -149,9 +149,8 @@ def send_noti(room, metrics: list, chance):
     if room == "living":
         room += "room"
     push_service = FCMNotification(
-        api_key="AAAAh8zZKmc:APA91bHCM7OfYaJZUAPA"
-                "-GVGTPpQMYpbi1RBIWCf4CtBAwpTArWQ_Na0Kla2PX7frNWBqnRtOQqb"
-                "Gq4khJVzgSheNQguJFjLpLKxrrH7nPjJwuzrpzN1J8NGztJ-NYyb-DEYI_8Ef5lB")
+        api_key="AAAAh8zZKmc:APA91bHCM7OfYaJZUAPA-GVGTPpQMYpbi1RBIWCf4CtBAwpTArWQ_Na0Kla2PX7fr"
+                "NWBqnRtOQqbGq4khJVzgSheNQguJFjLpLKxrrH7nPjJwuzrpzN1J8NGztJ-NYyb-DEYI_8Ef5lB")
 
     # attributes for the notification
     message_title = "Fire Hazard"

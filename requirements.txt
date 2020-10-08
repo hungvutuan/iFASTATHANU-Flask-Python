@@ -1,3 +1,4 @@
+PIL
 scikit-learn
 werkzeug
 matplotlib
