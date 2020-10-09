@@ -4,6 +4,7 @@ import sys
 import threading
 from datetime import date
 
+from flask_cors import CORS, cross_origin
 from flask import Flask, render_template, jsonify, request
 from mysql.connector import DatabaseError
 from werkzeug.exceptions import InternalServerError
@@ -16,6 +17,8 @@ from database import database as db
 app = Flask(__name__)
 app.secret_key = "4,\x178sg\xde=U=\xa7\xe5Hr\x11\xaf"
 decorator.decorate()
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Confirm that we're using Python 3
 assert sys.version_info.major == 3, VAR.get_error_python_version()
@@ -47,6 +50,7 @@ metrics = read_json_file('metrics.json')
 
 
 @app.route('/')
+@cross_origin()
 def init_dashboard():
     return render_template("dashboard.html")
 
@@ -430,7 +434,7 @@ def get_kitchen_percentage():
 @app.route("/prediction/bedroom", methods=['GET'])
 def get_bedroom_percentage():
     try:
-        return engine.live_percentage("bedroom", sensor_data_kitchen)
+        return engine.live_percentage("bedroom", sensor_data_bedroom)
     except Exception:
         raise InternalServerError
 
@@ -438,7 +442,7 @@ def get_bedroom_percentage():
 @app.route("/prediction/living", methods=['GET'])
 def get_living_percentage():
     try:
-        return engine.live_percentage("living", sensor_data_kitchen)
+        return engine.live_percentage("living", sensor_data_living)
     except Exception:
         raise InternalServerError
 
@@ -452,6 +456,7 @@ def get_mean_percentage():
 
 
 @app.route("/notification/feedback", methods=['POST'])
+@cross_origin()
 def get_user_feedback():
     try:
         data = request.get_json()
@@ -469,7 +474,7 @@ def get_user_feedback():
 
 @app.after_request
 def add_header(resp):
-    resp.headers['Allow'] = "POST, GET, DELETE"
+    resp.headers['Allow'] = "POST, GET, DELETE, OPTIONS"
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
 

@@ -13,7 +13,7 @@ from bin import global_var as VAR
 
 
 def train(isVisualize, epoch=300, learning_rate=0.3):
-    start_time = datetime.now().strftime("%H:%M:%S")
+    start_time = datetime.now()
     work_dir = os.path.dirname(os.path.realpath(__file__)).replace("\\", "/")
     val = []
 
@@ -155,8 +155,8 @@ def train(isVisualize, epoch=300, learning_rate=0.3):
     # un-comment to copy the file to the mother (top-most) directory
     # copy_file(src, dst) # un-comment to copy the file
 
-    end_time = datetime.now().strftime("%H:%M:%S")
-    print(datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time))
+    end_time = datetime.now()
+    print(str(end_time-start_time))
     return [Weight, Bias]
 
 

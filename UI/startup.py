@@ -8,7 +8,7 @@ logo_w = 200
 logo_h = int(logo_w / 5)
 # define buttons sizes
 btn_w, btn_h = 12, 2
-windows_size = '300x130'
+windows_size = '300x180'
 
 
 def handle_start(event):
@@ -17,8 +17,19 @@ def handle_start(event):
 
 
 def handle_retrain(event):
-    train(False)
+    # train(False, learning_rate=0.5)
+    start_bar()
     print("retrain pressed")
+
+def start_bar():
+    t = 25
+    pile = 10
+    incr = 100/pile
+    import time
+    for i in range(pile):
+        start_progress['value'] += incr
+        root.update_idletasks()
+        time.sleep(t/100)
 
 
 root = tk.Tk()
@@ -42,9 +53,9 @@ btn_start.pack()
 
 btn_retrain = tk.Button(text="RETRAIN", width=btn_w, height=btn_h)
 btn_retrain.bind("<Button-1>", handle_retrain)
-btn_retrain.pack(pady=10)
-progress = ttk.Progressbar(root, orient=tk.HORIZONTAL, length=100, mode='indeterminate')
-progress.pack()
+btn_retrain.pack(pady=5)
+start_progress = ttk.Progressbar(root, orient=tk.HORIZONTAL, length=200, mode='indeterminate')
+start_progress.pack(pady=5)
 
 root.resizable(True, True)
 root.mainloop()

@@ -3,6 +3,7 @@
 # check if the received data matches two predefined 'commands'
 
 import json
+import math
 import time
 
 import paho.mqtt.client as mqtt
@@ -32,20 +33,21 @@ def on_message(client, userdata, msg):
     if msg.topic == "CoreElectronics/bedroom":
         msg.payload = msg.payload.decode("utf-8")
         payload = json.loads(msg.payload)  # you can use json.loads to convert string to json
-        sensor_data_bedroom['smoke'] = payload['smoke']
-        sensor_data_bedroom['temperature'] = payload['temperature']
+        sensor_data_bedroom['smoke'] = math.ceil(float(payload['smoke']))
+        sensor_data_bedroom['temperature'] = math.ceil(float(payload['temperature']))
 
     if msg.topic == "CoreElectronics/kitchen":
         msg.payload = msg.payload.decode("utf-8")
         payload = json.loads(msg.payload)  # you can use json.loads to convert string to json
-        sensor_data_kitchen['smoke'] = payload['smoke']
-        sensor_data_kitchen['temperature'] = payload['temperature']
+        sensor_data_kitchen['smoke'] = math.ceil(float(payload['smoke']))
+        sensor_data_kitchen['temperature'] = math.ceil(float(payload['temperature']))
+
     if msg.topic == "CoreElectronics/living":
         msg.payload = msg.payload.decode("utf-8")
         payload = json.loads(msg.payload)  # you can use json.loads to convert string to json
-        sensor_data_living['smoke'] = payload['smoke']
-        sensor_data_living['temperature'] = payload['temperature']
-
+        sensor_data_living['smoke'] = math.ceil(float(payload['smoke']))
+        sensor_data_living['temperature'] = math.ceil(float(payload['temperature']))
+    # print(sensor_data_bedroom)
 
 # Create an MQTT client and attach our routines to it.
 client = mqtt.Client()
@@ -53,6 +55,7 @@ client.on_connect = on_connect
 client.on_message = on_message
 client.connect("broker.hivemq.com", 1883, 60)
 client.loop_start()
+# client.loop_forever()
 
 
 def getDataKitchen():

@@ -1,9 +1,11 @@
+import math
 import os
 import threading
 from datetime import date
 from shutil import copyfile, SameFileError
 
 import numpy as np
+from flask import jsonify
 from pyfcm import FCMNotification
 from database import database as db
 
@@ -175,9 +177,7 @@ def send_noti(room, metrics: list, chance):
 
 def live_percentage(room, sensor_data):
     """Return: The fire possibility of the param room"""
-    return {
-        room: int(feed(metrics_dict_to_list(sensor_data)))
-    }
+    return jsonify(int(feed(metrics_dict_to_list(sensor_data))))
 
 
 def mean_live_percentage(*sensor):
@@ -198,7 +198,7 @@ def metrics_dict_to_list(s):
     Output: [smoke - offset, temp - offset]
     Purpose: alter the input to pass as param of the feed() function
     """
-    return [s["smoke"] - VAR.SMOKE_OFFSET, s["temperature"] - VAR.TEMP_OFFSET]
+    return [s["smoke"] - VAR.SMOKE_OFFSET,s["temperature"] - VAR.TEMP_OFFSET]
 
 
 class ChangeDatasetError(Exception):

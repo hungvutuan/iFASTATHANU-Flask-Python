@@ -104,7 +104,7 @@ insert into sensor_loc(loc_name) values('Kitchen');
 insert into alarm(alarm_status)
 	values 	('Fire');
 insert into alarm(alarm_status)
-	values 	('Prominent');
+	values 	('Imminent');
 insert into alarm(alarm_status)
 	values 	('Safe');
 
@@ -126,6 +126,25 @@ insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, 
 	values	(1, 10, 20, 30, "2020-04-15", 1, 1, 1, 1);
 insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
 	values	(1, 10, 20, 30, "2020-04-15", 1, 1, 1, 1);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-05-15", 1, 1, 1, 1);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-06-15", 1, 1, 1, 1);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-06-15", 1, 1, 1, 1);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-07-15", 1, 1, 1, 2);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-07-15", 1, 1, 1, 3);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-07-15", 1, 1, 1, 3);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-07-15", 1, 1, 1, 2);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-08-15", 1, 1, 1, 2);
+insert into history_sensor(device_id, temp_reading, smoke_reading, gas_reading, date_reading, temp_id, smoke_id, gas_id, alarm_id)
+	values	(1, 10, 20, 30, "2020-08-15", 1, 1, 1, 1);
+
 
 insert into history_fire(fire_date, fire_percentage, loc_id)
 	values ("2020-12-10", 14, 1);
